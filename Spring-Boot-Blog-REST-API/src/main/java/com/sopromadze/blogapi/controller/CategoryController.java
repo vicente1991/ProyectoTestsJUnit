@@ -40,27 +40,27 @@ public class CategoryController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('USER')")
-	public ResponseEntity<Category> addCategory(@Valid @RequestBody Category category,
+	public Category addCategory(@Valid @RequestBody Category category,
 			@CurrentUser UserPrincipal currentUser) {
 
 		return categoryService.addCategory(category, currentUser);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Category> getCategory(@PathVariable(name = "id") Long id) {
+	public Category getCategory(@PathVariable(name = "id") Long id) {
 		return categoryService.getCategory(id);
 	}
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public ResponseEntity<Category> updateCategory(@PathVariable(name = "id") Long id,
+	public Category updateCategory(@PathVariable(name = "id") Long id,
 			@Valid @RequestBody Category category, @CurrentUser UserPrincipal currentUser) throws UnauthorizedException {
 		return categoryService.updateCategory(id, category, currentUser);
 	}
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public ResponseEntity<ApiResponse> deleteCategory(@PathVariable(name = "id") Long id,
+	public ApiResponse deleteCategory(@PathVariable(name = "id") Long id,
 			@CurrentUser UserPrincipal currentUser) throws UnauthorizedException {
 		return categoryService.deleteCategory(id, currentUser);
 	}
