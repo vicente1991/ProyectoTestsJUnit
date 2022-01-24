@@ -8,6 +8,7 @@ import com.sopromadze.blogapi.security.CurrentUser;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.CategoryService;
 import com.sopromadze.blogapi.utils.AppConstants;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,9 +26,10 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/categories")
+@RequiredArgsConstructor
 public class CategoryController {
-	@Autowired
-	private CategoryService categoryService;
+
+	private final CategoryService categoryService;
 
 	@GetMapping
 	public PagedResponse<Category> getAllCategories(
@@ -38,27 +40,27 @@ public class CategoryController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('USER')")
-	public Category addCategory(@Valid @RequestBody Category category,
+	public ResponseEntity<Category> addCategory(@Valid @RequestBody Category category,
 			@CurrentUser UserPrincipal currentUser) {
 
 		return categoryService.addCategory(category, currentUser);
 	}
 
 	@GetMapping("/{id}")
-	public Category getCategory(@PathVariable(name = "id") Long id) {
+	public ResponseEntity<Category> getCategory(@PathVariable(name = "id") Long id) {
 		return categoryService.getCategory(id);
 	}
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public Category updateCategory(@PathVariable(name = "id") Long id,
+	public ResponseEntity<Category> updateCategory(@PathVariable(name = "id") Long id,
 			@Valid @RequestBody Category category, @CurrentUser UserPrincipal currentUser) throws UnauthorizedException {
 		return categoryService.updateCategory(id, category, currentUser);
 	}
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public ApiResponse deleteCategory(@PathVariable(name = "id") Long id,
+	public ResponseEntity<ApiResponse> deleteCategory(@PathVariable(name = "id") Long id,
 			@CurrentUser UserPrincipal currentUser) throws UnauthorizedException {
 		return categoryService.deleteCategory(id, currentUser);
 	}

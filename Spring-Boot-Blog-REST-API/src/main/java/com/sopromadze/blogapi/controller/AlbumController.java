@@ -13,6 +13,7 @@ import com.sopromadze.blogapi.service.AlbumService;
 import com.sopromadze.blogapi.service.PhotoService;
 import com.sopromadze.blogapi.utils.AppConstants;
 import com.sopromadze.blogapi.utils.AppUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +33,12 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/albums")
+@RequiredArgsConstructor
 public class AlbumController {
-	@Autowired
-	private AlbumService albumService;
 
-	@Autowired
-	private PhotoService photoService;
+	private final AlbumService albumService;
+
+	private final PhotoService photoService;
 
 	@ExceptionHandler(ResponseEntityErrorException.class)
 	public ResponseEntity<ApiResponse> handleExceptions(ResponseEntityErrorException exception) {
@@ -55,25 +56,25 @@ public class AlbumController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('USER')")
-	public Album addAlbum(@Valid @RequestBody AlbumRequest albumRequest, @CurrentUser UserPrincipal currentUser) {
+	public ResponseEntity<Album> addAlbum(@Valid @RequestBody AlbumRequest albumRequest, @CurrentUser UserPrincipal currentUser) {
 		return albumService.addAlbum(albumRequest, currentUser);
 	}
 
 	@GetMapping("/{id}")
-	public Album getAlbum(@PathVariable(name = "id") Long id) {
+	public ResponseEntity<Album> getAlbum(@PathVariable(name = "id") Long id) {
 		return albumService.getAlbum(id);
 	}
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public AlbumResponse updateAlbum(@PathVariable(name = "id") Long id, @Valid @RequestBody AlbumRequest newAlbum,
+	public ResponseEntity<AlbumResponse> updateAlbum(@PathVariable(name = "id") Long id, @Valid @RequestBody AlbumRequest newAlbum,
 			@CurrentUser UserPrincipal currentUser) {
 		return albumService.updateAlbum(id, newAlbum, currentUser);
 	}
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public ApiResponse deleteAlbum(@PathVariable(name = "id") Long id, @CurrentUser UserPrincipal currentUser) {
+	public ResponseEntity<ApiResponse> deleteAlbum(@PathVariable(name = "id") Long id, @CurrentUser UserPrincipal currentUser) {
 		return albumService.deleteAlbum(id, currentUser);
 	}
 

@@ -10,6 +10,7 @@ import com.sopromadze.blogapi.repository.CategoryRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.CategoryService;
 import com.sopromadze.blogapi.utils.AppUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,10 +25,10 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-	@Autowired
-	private CategoryRepository categoryRepository;
+	private final CategoryRepository categoryRepository;
 
 	@Override
 	public PagedResponse<Category> getAllCategories(int page, int size) {
@@ -44,37 +45,37 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	@Override
-	public Category getCategory(Long id) {
+	public ResponseEntity<Category> getCategory(Long id) {
 		Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
-		return category;
+		return new ResponseEntity<>(category, HttpStatus.OK);
 	}
 
 	@Override
-	public Category addCategory(Category category, UserPrincipal currentUser) {
+	public ResponseEntity<Category> addCategory(Category category, UserPrincipal currentUser) {
 		Category newCategory = categoryRepository.save(category);
-		return newCategory;
+		return new ResponseEntity<>(newCategory, HttpStatus.CREATED);
 	}
 
 	@Override
-	public Category updateCategory(Long id, Category newCategory, UserPrincipal currentUser) {
+	public ResponseEntity<Category> updateCategory(Long id, Category newCategory, UserPrincipal currentUser) {
 		Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
 		if (category.getCreatedBy().equals(currentUser.getId()) || currentUser.getAuthorities()
 				.contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString()))) {
 			category.setName(newCategory.getName());
 			Category updatedCategory = categoryRepository.save(category);
-			return updatedCategory;
+			return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
 		}
 
 		throw new UnauthorizedException("You don't have permission to edit this category");
 	}
 
 	@Override
-	public ApiResponse deleteCategory(Long id, UserPrincipal currentUser) {
+	public ResponseEntity<ApiResponse> deleteCategory(Long id, UserPrincipal currentUser) {
 		Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("category", "id", id));
 		if (category.getCreatedBy().equals(currentUser.getId()) || currentUser.getAuthorities()
 				.contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString()))) {
 			categoryRepository.deleteById(id);
-			return new ApiResponse(Boolean.TRUE, "You successfully deleted category");
+			return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "You successfully deleted category"), HttpStatus.OK);
 		}
 		throw new UnauthorizedException("You don't have permission to delete this category");
 	}

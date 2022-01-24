@@ -11,13 +11,13 @@ public interface CategoryService {
 
 	PagedResponse<Category> getAllCategories(int page, int size);
 
-	Category getCategory(Long id);
+	ResponseEntity<Category> getCategory(Long id);
 
-	Category addCategory(Category category, UserPrincipal currentUser);
+	ResponseEntity<Category> addCategory(Category category, UserPrincipal currentUser);
 
-	Category updateCategory(Long id, Category newCategory, UserPrincipal currentUser)
+	ResponseEntity<Category> updateCategory(Long id, Category newCategory, UserPrincipal currentUser)
 			throws UnauthorizedException;
 
-	ApiResponse deleteCategory(Long id, UserPrincipal currentUser) throws UnauthorizedException;
+	ResponseEntity<ApiResponse> deleteCategory(Long id, UserPrincipal currentUser) throws UnauthorizedException;
 
 }
