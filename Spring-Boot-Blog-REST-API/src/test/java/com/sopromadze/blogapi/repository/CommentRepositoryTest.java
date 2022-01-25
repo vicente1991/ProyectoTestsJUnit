@@ -33,7 +33,7 @@ class CommentRepositoryTest {
 
         Pageable pageable = PageRequest.of(1, 10, Sort.Direction.DESC, "createdAt");
 
-        Page<Comment> comment = commentRepository.findByPostId(1L, pageable);
+        Page<Comment> comment = commentRepository.findByPostId(4L, pageable);
 
         assertEquals(1, comment);
     }

@@ -9,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -23,6 +24,21 @@ class AlbumServiceImplTest {
 
         assertEquals(lista.size(), 0);
     }
+
+    @Test
+    void isAlbumListFull() {
+        List<Album> lista = albumRepository.findAll();
+
+        assertThat(lista.size() > 0);
+    }
+
+
+
+
+
+
+
+
 
     @Test
     void addAlbum() {
