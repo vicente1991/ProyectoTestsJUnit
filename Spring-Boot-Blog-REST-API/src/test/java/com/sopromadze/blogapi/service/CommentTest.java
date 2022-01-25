@@ -3,9 +3,12 @@ package com.sopromadze.blogapi.service;
 import com.sopromadze.blogapi.model.Comment;
 import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.CommentRequest;
 import com.sopromadze.blogapi.repository.CommentRepository;
 import com.sopromadze.blogapi.repository.PostRepository;
 import com.sopromadze.blogapi.repository.UserRepository;
+import com.sopromadze.blogapi.security.UserPrincipal;
+import com.sopromadze.blogapi.service.impl.CommentServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +37,7 @@ public class CommentTest {
     UserRepository userRepository;
 
     @InjectMocks
-    CommentService commentService;
+    CommentServiceImpl commentService;
 
 
 
@@ -46,23 +50,37 @@ public class CommentTest {
         u.setEmail("Vicente@mail.com");
         u.setUsername("Vicent");
 
+        UserPrincipal up= UserPrincipal.builder()
+                .id(2L)
+                .email("blabla@mail.com")
+                .firstName("bla")
+                .lastName("blabla")
+                .build();
+
         Post p= new Post();
         p.setTitle("Post General");
         p.setId(1L);
         p.setBody("Explicando cosas");
         p.setUser(u);
 
-        lenient().when(userRepository.findByUsername("Vicent")).thenReturn(java.util.Optional.of((u)));
+        CommentRequest com = new CommentRequest();
+                com.setBody("nuevo mensaje de texto");
+
+        lenient().when(userRepository.getUser(up)).thenReturn(u);
         Map<String,Integer> nuevo= Map.of("1",2);
 
         Comment c= new Comment();
         c.setName("Comentario 1");
+        c.setId(1L);
         c.setEmail("Vicente@mail.com");
         c.setBody("Hola que tal");
         c.setUser(u);
 
-        lenient().when(commentRepository.save(c)).thenReturn(c);
-        assertEquals(c,commentService.addComment(c,nuevo));
+
+        lenient().when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
+        lenient().when(commentRepository.save(any(Comment.class))).thenReturn(c);
+
+        assertEquals(c,commentService.addComment(com,1L,up));
     }
 
 
