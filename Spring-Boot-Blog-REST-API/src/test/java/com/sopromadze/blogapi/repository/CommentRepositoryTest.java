@@ -1,6 +1,7 @@
 package com.sopromadze.blogapi.repository;
 
 import com.sopromadze.blogapi.model.Comment;
+import lombok.RequiredArgsConstructor;
 import org.apache.catalina.core.ApplicationContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,13 @@ import javax.persistence.EntityManager;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
+@RequiredArgsConstructor
 class CommentRepositoryTest {
 
-    @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
     private EntityManager entityManager;
 
-    @Autowired
     private CommentRepository commentRepository;
 
     @Test
