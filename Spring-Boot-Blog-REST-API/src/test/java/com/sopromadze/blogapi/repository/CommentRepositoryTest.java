@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.catalina.core.ApplicationContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import org.springframework.data.domain.Page;
@@ -16,24 +17,22 @@ import javax.persistence.EntityManager;
 
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest
-@RequiredArgsConstructor
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CommentRepositoryTest {
 
-    private ApplicationContext applicationContext;
-
-    private EntityManager entityManager;
-
-    private CommentRepository commentRepository;
+    @Autowired
+    CommentRepository commentRepository;
 
     @Test
     void findByPostId() {
 
-        Pageable pageable = PageRequest.of(1, 10, Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.DESC, "createdAt");
 
-        Page<Comment> comment = commentRepository.findByPostId(4L, pageable);
+        Page<Comment> comment = commentRepository.findByPostId(1L, pageable);
 
-        assertEquals(1, comment);
+        assertNotEquals(comment.getTotalElements(), 0);
     }
 }

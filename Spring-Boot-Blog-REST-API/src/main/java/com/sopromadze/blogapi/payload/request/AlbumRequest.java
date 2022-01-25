@@ -3,6 +3,7 @@ package com.sopromadze.blogapi.payload.request;
 import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.UserDateAuditPayload;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
+@Builder
 public class AlbumRequest extends UserDateAuditPayload {
 
 	private Long id;
