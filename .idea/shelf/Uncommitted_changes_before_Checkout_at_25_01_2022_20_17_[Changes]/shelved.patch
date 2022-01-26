@@ -1,0 +1,89 @@
+Index: Spring-Boot-Blog-REST-API/src/test/java/com/sopromadze/blogapi/service/CommentTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.sopromadze.blogapi.service;\r\n\r\nimport com.sopromadze.blogapi.model.Comment;\r\nimport com.sopromadze.blogapi.model.Post;\r\nimport com.sopromadze.blogapi.model.user.User;\r\nimport com.sopromadze.blogapi.repository.CommentRepository;\r\nimport com.sopromadze.blogapi.repository.PostRepository;\r\nimport com.sopromadze.blogapi.repository.UserRepository;\r\nimport org.junit.jupiter.api.Test;\r\nimport org.junit.jupiter.api.extension.ExtendWith;\r\nimport org.mockito.InjectMocks;\r\nimport org.mockito.Mock;\r\nimport org.mockito.junit.jupiter.MockitoExtension;\r\nimport org.springframework.data.domain.Page;\r\nimport org.springframework.data.domain.Pageable;\r\n\r\nimport java.util.List;\r\nimport java.util.Map;\r\n\r\nimport static org.junit.jupiter.api.Assertions.assertEquals;\r\nimport static org.mockito.Mockito.lenient;\r\n\r\n@ExtendWith(MockitoExtension.class)\r\npublic class CommentTest {\r\n\r\n    @Mock\r\n    CommentRepository commentRepository;\r\n\r\n    @Mock\r\n    PostRepository postRepository;\r\n\r\n    @Mock\r\n    UserRepository userRepository;\r\n\r\n    @InjectMocks\r\n    CommentService commentService;\r\n\r\n\r\n\r\n    @Test\r\n    public void whennewComment_Succespublic(){\r\n\r\n        User u= new User();\r\n        u.setFirstName(\"Vicente\");\r\n        u.setLastName(\"Rufo Bru\");\r\n        u.setEmail(\"Vicente@mail.com\");\r\n        u.setUsername(\"Vicent\");\r\n\r\n        Post p= new Post();\r\n        p.setTitle(\"Post General\");\r\n        p.setId(1L);\r\n        p.setBody(\"Explicando cosas\");\r\n        p.setUser(u);\r\n\r\n        lenient().when(userRepository.findByUsername(\"Vicent\")).thenReturn(java.util.Optional.of((u)));\r\n        Map<String,Integer> nuevo= Map.of(\"1\",2);\r\n\r\n        Comment c= new Comment();\r\n        c.setName(\"Comentario 1\");\r\n        c.setEmail(\"Vicente@mail.com\");\r\n        c.setBody(\"Hola que tal\");\r\n        c.setUser(u);\r\n\r\n        lenient().when(commentRepository.save(c)).thenReturn(c);\r\n        assertEquals(c,commentService.addComment(c,nuevo));\r\n    }\r\n\r\n\r\n}\r\n
+===================================================================
+diff --git a/Spring-Boot-Blog-REST-API/src/test/java/com/sopromadze/blogapi/service/CommentTest.java b/Spring-Boot-Blog-REST-API/src/test/java/com/sopromadze/blogapi/service/CommentTest.java
+--- a/Spring-Boot-Blog-REST-API/src/test/java/com/sopromadze/blogapi/service/CommentTest.java	
++++ b/Spring-Boot-Blog-REST-API/src/test/java/com/sopromadze/blogapi/service/CommentTest.java	
+@@ -1,11 +1,14 @@
+ package com.sopromadze.blogapi.service;
+ 
++import com.sopromadze.blogapi.model.Album;
+ import com.sopromadze.blogapi.model.Comment;
+ import com.sopromadze.blogapi.model.Post;
+ import com.sopromadze.blogapi.model.user.User;
++import com.sopromadze.blogapi.payload.request.AlbumRequest;
+ import com.sopromadze.blogapi.repository.CommentRepository;
+ import com.sopromadze.blogapi.repository.PostRepository;
+ import com.sopromadze.blogapi.repository.UserRepository;
++import com.sopromadze.blogapi.security.UserPrincipal;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.extension.ExtendWith;
+ import org.mockito.InjectMocks;
+@@ -17,7 +20,9 @@
+ import java.util.List;
+ import java.util.Map;
+ 
++import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.Mockito.lenient;
+ 
+ @ExtendWith(MockitoExtension.class)
+@@ -40,11 +45,15 @@
+     @Test
+     public void whennewComment_Succespublic(){
+ 
+-        User u= new User();
+-        u.setFirstName("Vicente");
+-        u.setLastName("Rufo Bru");
+-        u.setEmail("Vicente@mail.com");
+-        u.setUsername("Vicent");
++        UserPrincipal user = UserPrincipal
++                .builder()
++                .id(2L)
++                .email("inma.dvgs@gmail.com")
++                .username("inmadv")
++                .build();
++
++
++        User usuarioNormal = userRepository.getUser(user);
+ 
+         Post p= new Post();
+         p.setTitle("Post General");
+@@ -64,6 +73,34 @@
+         lenient().when(commentRepository.save(c)).thenReturn(c);
+         assertEquals(c,commentService.addComment(c,nuevo));
+     }
++    @Test
++    void addsAlbum() {
++
++
++        UserPrincipal user = UserPrincipal
++                .builder()
++                .id(2L)
++                .email("inma.dvgs@gmail.com")
++                .username("inmadv")
++                .build();
++
++
++        User usuarioNormal = userRepository.getUser(user);
++
++        Album album = Album.builder()
++                .title("Taylor Swift")
++                .id(1L)
++                .user(usuarioNormal)
++                .build();
++
++        AlbumRequest albumRequest = AlbumRequest.builder().user(usuarioNormal).build();
++
++        lenient().when(albumRepository.save(any(Album.class))).thenReturn(album);
++
++        Album result = albumService.addAlbum(albumRequest, user);
++
++        assertThat(albumRepository.findById(album.getId()).isPresent());
++    }
+ 
+ 
+ }
