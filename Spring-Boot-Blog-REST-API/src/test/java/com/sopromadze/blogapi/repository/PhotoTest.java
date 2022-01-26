@@ -39,7 +39,7 @@ public class PhotoTest {
     @Test
     void test_findByAlbumId() {
 
-        Album album = new Album();
+        Album album = Album.builder().build();
         album.setTitle("Fotos");
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());

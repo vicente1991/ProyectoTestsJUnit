@@ -31,7 +31,7 @@ public class AlbumTest {
     @Test
     void test_findAll() {
 
-        Album album = new Album();
+        Album album = Album.builder().build();
         album.setTitle("Título");
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
@@ -44,7 +44,7 @@ public class AlbumTest {
 
     @Test
     void findCreated_Succes(){
-        Album a= new Album();
+        Album a= Album.builder().build();
         a.setTitle("album mejor que el anterior");
         a.setCreatedAt(Instant.now());
         a.setUpdatedAt(Instant.now());
