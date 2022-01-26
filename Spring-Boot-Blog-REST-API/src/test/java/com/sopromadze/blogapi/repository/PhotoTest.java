@@ -26,6 +26,9 @@ public class PhotoTest {
     private PhotoRepository repository;
 
     @Autowired
+    private AlbumRepository albumRepository ;
+
+    @Autowired
     private TestEntityManager testEntityManager;
 
     @Test
@@ -37,7 +40,6 @@ public class PhotoTest {
     void test_findByAlbumId() {
 
         Album album = new Album();
-        album.setId(1L);
         album.setTitle("Fotos");
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
@@ -46,17 +48,20 @@ public class PhotoTest {
 
 
         Photo photo = new Photo();
-        photo.setId(1L);
         photo.setTitle("Photo1");
         photo.setThumbnailUrl("https//photos");
+        photo.setUrl("asd");
         photo.setAlbum(album);
+        photo.setCreatedAt(Instant.now());
+        photo.setUpdatedAt(Instant.now());
 
         testEntityManager.persist(photo);
 
+        
 
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
 
-        assertNotEquals(0, repository.findByAlbumId(album.getId(), pageable).get().findAny());
+        assertNotEquals(0, repository.findByAlbumId(album.getId(), pageable).getTotalElements());
 
     }
 }
