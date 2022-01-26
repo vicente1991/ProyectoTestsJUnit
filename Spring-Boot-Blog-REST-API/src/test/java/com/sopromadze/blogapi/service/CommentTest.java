@@ -23,6 +23,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentTest {
@@ -42,7 +43,7 @@ public class CommentTest {
 
 
     @Test
-    public void whennewComment_Succespublic(){
+    public void whennewComment_Succes(){
 
         User u= new User();
         u.setFirstName("Vicente");
@@ -66,8 +67,7 @@ public class CommentTest {
         CommentRequest com = new CommentRequest();
                 com.setBody("nuevo mensaje de texto");
 
-        lenient().when(userRepository.getUser(up)).thenReturn(u);
-        Map<String,Integer> nuevo= Map.of("1",2);
+        when(userRepository.getUser(up)).thenReturn(u);
 
         Comment c= new Comment();
         c.setName("Comentario 1");
@@ -76,11 +76,15 @@ public class CommentTest {
         c.setBody("Hola que tal");
         c.setUser(u);
 
-
-        lenient().when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
-        lenient().when(commentRepository.save(any(Comment.class))).thenReturn(c);
-
+        when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
+        when(commentRepository.save(any(Comment.class))).thenReturn(c);
         assertEquals(c,commentService.addComment(com,1L,up));
+    }
+
+    @Test
+    void deleteComment_Succes(){
+
+
     }
 
 
