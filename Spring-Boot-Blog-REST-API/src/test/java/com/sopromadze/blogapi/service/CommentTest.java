@@ -1,5 +1,6 @@
 package com.sopromadze.blogapi.service;
 
+import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.model.Comment;
 import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.role.Role;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -52,7 +54,7 @@ public class CommentTest {
 
 
     @Test
-    void getComments_Success(){
+    void getAllComments_Success(){
 
         Comment c= new Comment();
         c.setName("Vicente");
@@ -244,10 +246,53 @@ public class CommentTest {
         Comment c2= commentRepository.save(c);
         assertEquals(c,c2);
     }
+    @Test
+    void deleteComment_throwResourceNotFoundException(){
+
+        Post p = new Post();
+        p.setId(1L);
+        p.setTitle("Post Nuevo");
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User u= new User();
+        u.setId(1L);
+        u.setRoles(roles);
+        u.setFirstName("Vicente");
+        u.setLastName("Rufo Bru");
+        u.setEmail("Vicente@mail.com");
+        u.setUsername("Vicent");
+
+        Comment c= new Comment();
+        c.setName("Comentario 1");
+        c.setId(1L);
+        c.setPost(p);
+        c.setEmail("Vicente@mail.com");
+        c.setBody("Hola que tal");
+        c.setUser(u);
 
 
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(2L)
+                .authorities(u.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
 
+        ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException("a", "x", 1L);
 
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(false);
+        apiResponse.setMessage("You don't have permission to delete this comment");
+
+        lenient().when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
+        lenient().when(commentRepository.findById(1L)).thenReturn(java.util.Optional.of(c));
+        lenient().when(commentRepository.deleteById(c.getId()));
+        assertThrows(resourceNotFoundException.getClass(), ()->commentRepository.deleteById(0L));
+
+    }
 
 
 }
