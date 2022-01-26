@@ -51,6 +51,11 @@ public class CommentTest {
     @Test
     void getComments_Success(){
 
+    }
+
+    @Test
+    void getOneComments_Success(){
+
         User u= new User();
         u.setFirstName("Vicente");
         u.setLastName("Rufo Bru");
