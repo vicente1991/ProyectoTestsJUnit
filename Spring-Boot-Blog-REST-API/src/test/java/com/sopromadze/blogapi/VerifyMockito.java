@@ -46,7 +46,7 @@ public class VerifyMockito {
         user.setId(1L);
 
 
-        Album album = new Album();
+        Album album = Album.builder().build();
         album.setUser(user);
         album.setTitle("El album");
 
