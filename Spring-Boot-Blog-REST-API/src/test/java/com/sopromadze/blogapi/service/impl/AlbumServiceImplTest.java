@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -48,6 +49,8 @@ class AlbumServiceImplTest {
 
     @Mock
     UserRepository userRepository;
+
+
 
     static Album album, album2;
     static User user, user2, user3;
@@ -103,6 +106,7 @@ class AlbumServiceImplTest {
         user2.setAlbums(listaAlbumes);
 
         blogapiException = new BlogapiException(HttpStatus.UNAUTHORIZED, YOU_DON_T_HAVE_PERMISSION_TO_MAKE_THIS_OPERATION);
+
     }
 
     @Test
@@ -125,7 +129,7 @@ class AlbumServiceImplTest {
     @Test
     void getAlbum() {
         when(albumRepository.findById(any(Long.class))).thenReturn(Optional.of(album));
-        assertEquals(album, albumService.getAlbum(1L));
+        assertNotNull(albumService.getAlbum(1L));
     }
 
     @Test
@@ -181,8 +185,21 @@ class AlbumServiceImplTest {
         assertEquals(albumService.deleteAlbum(1L, userPrincipal.create(user3)), blogapiException);
     }
 
-
     @Test
-    void getUserAlbums() {
+    void getUserAlbums(){
+
+        List<Album> listaAlbumes = new ArrayList<>();
+        listaAlbumes.add(album);
+
+        Page<Album> pageable = new PageImpl<Album>(listaAlbumes);
+
+        when(userRepository.getUserByName(any(String.class))).thenReturn(user);
+        when(albumRepository.findByCreatedById(any(Long.class), any(Pageable.class))).thenReturn(pageable);
+
+        assertEquals(1, albumService.getUserAlbums(user.getUsername(), 1, 1).getSize());
+
     }
+
+
+
 }
