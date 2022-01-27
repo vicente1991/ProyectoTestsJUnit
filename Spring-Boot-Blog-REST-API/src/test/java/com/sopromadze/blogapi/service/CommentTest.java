@@ -289,7 +289,7 @@ public class CommentTest {
 
         lenient().when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
         lenient().when(commentRepository.findById(1L)).thenReturn(java.util.Optional.of(c));
-        lenient().when(commentRepository.deleteById(c.getId()));
+        //lenient().when(commentRepository.deleteById(c.getId()));
         assertThrows(resourceNotFoundException.getClass(), ()->commentRepository.deleteById(0L));
 
     }
