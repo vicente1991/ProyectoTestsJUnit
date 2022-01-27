@@ -11,9 +11,11 @@ import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.AlbumResponse;
 import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
+import com.sopromadze.blogapi.payload.PhotoResponse;
 import com.sopromadze.blogapi.payload.request.AlbumRequest;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.AlbumService;
+import com.sopromadze.blogapi.service.PhotoService;
 import lombok.extern.java.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -58,6 +61,9 @@ public class AlbumTest {
     @MockBean
     private AlbumService albumService;
 
+    @MockBean
+    private PhotoService photoService;
+
     PagedResponse<AlbumResponse> albumList;
     Album albumResult;
     UserPrincipal userPrincipal;
@@ -66,6 +72,7 @@ public class AlbumTest {
     AlbumResponse albumResponse;
     AlbumRequest albumRequest;
     ApiResponse apiResponse;
+    PagedResponse<PhotoResponse> photoResponsePagedResponse;
     @BeforeEach
     void initTest() {
         Album album = Album.builder()
@@ -111,6 +118,19 @@ public class AlbumTest {
         apiResponse = new ApiResponse();
         apiResponse.setSuccess(true);
         apiResponse.setMessage("You successfully deleted category");
+
+
+        Page<Photo> photos= Page.empty();
+
+        List<PhotoResponse> photoResponses = new ArrayList<>(photos.getContent().size());
+        for (Photo photo : photos.getContent()) {
+            photoResponses.add(new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
+                    photo.getThumbnailUrl(), photo.getAlbum().getId()));
+        }
+
+
+        photoResponsePagedResponse = new PagedResponse<>(photoResponses, photos.getNumber(), photos.getSize(), photos.getTotalElements(),
+                photos.getTotalPages(), photos.isLast());
 
     }
 
@@ -202,6 +222,29 @@ public class AlbumTest {
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
     }
+
+
+    @Test
+    void deleteAlbum_thenReturn401() throws Exception {
+        when(albumService.deleteAlbum(1L,userPrincipal)).thenReturn(apiResponse);
+        mockMvc.perform(delete("/api/albums/{id}",1L)
+                        .param("page", "1")
+                        .param("size", "1")
+                        .contentType("application/json"))
+                .andExpect(status().isUnauthorized()).andDo(print());
+    }
+
+    @Test
+    void getAllPhotosByAlbum_success() throws Exception {
+        when(photoService.getAllPhotosByAlbum(1L,1,1)).thenReturn(photoResponsePagedResponse);
+        mockMvc.perform(get("/api/albums/{id}/photos",1L)
+                        .param("page", "1")
+                        .param("size", "1")
+                        .contentType("application/json"))
+                .andExpect(status().isOk()).andDo(print());
+    }
+
+
 
 
 }
