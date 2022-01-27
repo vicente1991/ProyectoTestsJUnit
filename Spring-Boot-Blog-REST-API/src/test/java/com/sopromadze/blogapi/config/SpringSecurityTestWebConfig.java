@@ -3,22 +3,22 @@ package com.sopromadze.blogapi.config;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.UserProfile;
+import com.sopromadze.blogapi.security.UserPrincipal;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @TestConfiguration
 public class SpringSecurityTestWebConfig {
 
-    @Bean("customUserDetailsServiceImpl")
+    @Bean("customUserDetailsService")
     @Primary
     public UserDetailsService userDetailsService() {
 
@@ -37,13 +37,19 @@ public class SpringSecurityTestWebConfig {
         admin.setUsername("admin");
         admin.setRoles(ambosRoles);
 
+
+
+
         User user = new User();
         user.setPassword("user");
         user.setUsername("user");
         user.setRoles(rol);
 
+        UserPrincipal userP = UserPrincipal.create(user);
 
-        return new InMemoryUserDetailsManager((UserDetails) List.of(admin, user));
+
+        return new InMemoryUserDetailsManager(List.of(adminP, userP));
+
 
     }
 
