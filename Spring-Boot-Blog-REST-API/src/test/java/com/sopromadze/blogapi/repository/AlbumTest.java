@@ -61,7 +61,7 @@ public class AlbumTest {
         u.setAlbums(album);
         u.setCreatedAt(Instant.now());
 
-        assertNotEquals(0,albumRepository.findByCreatedById(u.getId(),pageable).getTotalElements());
+        assertNotEquals(0,albumRepository.findByCreatedBy(u.getId(),pageable).getTotalElements());
 
     }
 

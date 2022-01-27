@@ -37,13 +37,10 @@ public class SpringSecurityTestWebConfig {
         admin.setUsername("admin");
         admin.setRoles(ambosRoles);
 
-
-
         User user = new User();
         user.setPassword("user");
         user.setUsername("user");
         user.setRoles(rol);
-
 
 
         return new InMemoryUserDetailsManager((UserDetails) List.of(admin, user));

@@ -194,7 +194,7 @@ class AlbumServiceImplTest {
         Page<Album> pageable = new PageImpl<Album>(listaAlbumes);
 
         when(userRepository.getUserByName(any(String.class))).thenReturn(user);
-        when(albumRepository.findByCreatedById(any(Long.class), any(Pageable.class))).thenReturn(pageable);
+        when(albumRepository.findByCreatedBy(any(Long.class), any(Pageable.class))).thenReturn(pageable);
 
         assertEquals(1, albumService.getUserAlbums(user.getUsername(), 1, 1).getSize());
 
