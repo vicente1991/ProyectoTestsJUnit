@@ -2,12 +2,14 @@ package com.sopromadze.blogapi.service.impl;
 
 
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
+import com.sopromadze.blogapi.exception.UnauthorizedException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Category;
 import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.repository.CategoryRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,7 +91,7 @@ public class CategoryTest {
         assertEquals(category,categoryService.getCategory(1L));
     }
     @Test
-    void getCategory_exception(){
+    void getCategory_throwResourceNotFoundException(){
         when(categoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class,()->categoryService.getCategory(any(Long.class)));
     }
@@ -124,8 +127,204 @@ public class CategoryTest {
         assertEquals(category,categoryService.addCategory(category, userPrincipal));
     }
 
+
+    @Test
+    void updateCategory_success(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+        List<Post> postList = new ArrayList<>();
+
+
+
+        Category newCategory = new Category();
+        newCategory.setId(1L);
+        newCategory.setPosts(postList);
+        newCategory.setName("Categoria nueva");
+        //newCategory.setCreatedBy(10L);
+
+        Category category = new Category();
+        category.setId(4L);
+        category.setPosts(postList);
+        category.setName("Categoria");
+        category.setCreatedBy(3L);
+
+
+
+        when(categoryRepository.findById(4L)).thenReturn(Optional.of(category));
+        category.setName(newCategory.getName());
+
+        when(categoryRepository.save(category)).thenReturn(category);
+
+        assertEquals(category,categoryService.updateCategory(4L,newCategory,userPrincipal));
+    }
+
+    @Test
+    void updateCategory_throwResourceNotFoundException(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+        when(categoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,()->categoryService.updateCategory(null,any(Category.class),userPrincipal));
+    }
+    @Test
+    void updateCategory_throwUnauthorizedException(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+        List<Post> postList = new ArrayList<>();
+
+        Category newCategory = new Category();
+        newCategory.setId(1L);
+        newCategory.setPosts(postList);
+        newCategory.setName("Categoria nueva");
+
+        Category category = new Category();
+        category.setId(4L);
+        category.setPosts(postList);
+        category.setName("Categoria");
+        category.setCreatedBy(10L);
+
+
+
+        when(categoryRepository.findById(4L)).thenReturn(Optional.of(category));
+        category.setName(newCategory.getName());
+
+        when(categoryRepository.save(category)).thenReturn(category);
+
+        assertThrows(UnauthorizedException.class,()->categoryService.updateCategory(4L,newCategory,userPrincipal));
+    }
+
+    @Test
+    void deleteCategory_success(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+        List<Post> postList = new ArrayList<>();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(true);
+        apiResponse.setMessage("You successfully deleted category");
+
+        Category category = new Category();
+        category.setId(4L);
+        category.setPosts(postList);
+        category.setName("Categoria");
+        category.setCreatedBy(3L);
+
+        when(categoryRepository.findById(4L)).thenReturn(Optional.of(category));
+        doNothing().when(categoryRepository).delete(category);
+        categoryService.deleteCategory(4L,userPrincipal);
+        assertEquals(apiResponse,categoryService.deleteCategory(category.getId(),userPrincipal));
+
+    }
+
+    @Test
+    void deleteCategory_throwResourceNotFoundException(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+        when(categoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,()->categoryService.deleteCategory(any(Long.class),userPrincipal));
+    }
+
+    @Test
+    void deleteCategory_throwUnauthorizedException(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+        List<Post> postList = new ArrayList<>();
+
+        Category newCategory = new Category();
+        newCategory.setId(1L);
+        newCategory.setPosts(postList);
+        newCategory.setName("Categoria nueva");
+
+        Category category = new Category();
+        category.setId(4L);
+        category.setPosts(postList);
+        category.setName("Categoria");
+        category.setCreatedBy(10L);
+
+
+
+        when(categoryRepository.findById(4L)).thenReturn(Optional.of(category));
+        category.setName(newCategory.getName());
+
+        when(categoryRepository.save(category)).thenReturn(category);
+
+        assertThrows(UnauthorizedException.class,()->categoryService.deleteCategory(4L,userPrincipal));
+    }
 }
-
-
-    //Esto se usa para los delete
-    //doNothing().when(categoryRepository).delete(category);

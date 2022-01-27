@@ -79,7 +79,6 @@ public class CommentServiceImpl implements CommentService {
 		if (comment.getPost().getId().equals(post.getId())) {
 			return comment;
 		}
-
 		throw new BlogapiException(HttpStatus.BAD_REQUEST, COMMENT_DOES_NOT_BELONG_TO_POST);
 	}
 
@@ -110,17 +109,14 @@ public class CommentServiceImpl implements CommentService {
 				.orElseThrow(() -> new ResourceNotFoundException(POST_STR, ID_STR, postId));
 		Comment comment = commentRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(COMMENT_STR, ID_STR, id));
-
 		if (!comment.getPost().getId().equals(post.getId())) {
 			return new ApiResponse(Boolean.FALSE, COMMENT_DOES_NOT_BELONG_TO_POST);
 		}
-
 		if (comment.getUser().getId().equals(currentUser.getId())
 				|| currentUser.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString()))) {
 			commentRepository.deleteById(comment.getId());
 			return new ApiResponse(Boolean.TRUE, "You successfully deleted comment");
 		}
-
 		throw new BlogapiException(HttpStatus.UNAUTHORIZED, YOU_DON_T_HAVE_PERMISSION_TO + "delete" + THIS_COMMENT);
 	}
 }

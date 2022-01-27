@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-@Service
+@Service("userDetailsService")
 @RequiredArgsConstructor
 public class CustomUserDetailsServiceImpl implements UserDetailsService, CustomUserDetailsService {
 

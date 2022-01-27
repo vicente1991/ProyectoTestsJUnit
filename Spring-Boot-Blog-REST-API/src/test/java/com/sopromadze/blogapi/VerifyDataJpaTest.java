@@ -41,9 +41,9 @@ public class VerifyDataJpaTest {
         testEntityManager.persist(album);
 
         assertNotEquals(0, repository.findAll().size());
-
-
     }
+
+
 
 
 }
