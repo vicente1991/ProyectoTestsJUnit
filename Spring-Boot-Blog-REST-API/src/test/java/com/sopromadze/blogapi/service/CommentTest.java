@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentTest {
@@ -193,8 +192,8 @@ public class CommentTest {
 
         lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.of(p));
         lenient().when(commentRepository.findById(c.getId())).thenReturn(java.util.Optional.of(c));
-        commentService.deleteComment(c.getId(),c.getId(),up);
-        assertEquals(true,up.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString())));
+        doNothing().when(commentRepository).deleteById(c.getId());
+        assertEquals(true,commentService.deleteComment(p.getId(),c.getId(),up).getSuccess());
 
     }
 
@@ -289,7 +288,7 @@ public class CommentTest {
 
         lenient().when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
         lenient().when(commentRepository.findById(1L)).thenReturn(java.util.Optional.of(c));
-        lenient().when(commentRepository.deleteById(c.getId()));
+        //lenient().when(commentRepository.deleteById(c.getId()));
         assertThrows(resourceNotFoundException.getClass(), ()->commentRepository.deleteById(0L));
 
     }
