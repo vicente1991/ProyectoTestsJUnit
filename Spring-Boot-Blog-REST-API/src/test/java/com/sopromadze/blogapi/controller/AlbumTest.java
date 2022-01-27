@@ -14,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+
+import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
@@ -41,7 +44,7 @@ public class AlbumTest {
     @MockBean
     private AlbumService albumService;
 
-    PagedResponse<AlbumResponse> albumList;
+
     Album albumResult;
     @BeforeEach
     void initTest() {
@@ -51,29 +54,33 @@ public class AlbumTest {
                 .build();
 
 
-        albumResult = album;
+        //albumList = new PagedResponse(List.of(album),1,1,1,1,true);
 
 
     }
 
 
 
-    //@WithUserDetails("admin")
+    @WithUserDetails("admin")
     @Test
     @DisplayName("GET /allAlbum/ sin parámetros de filtrado")
     void getAllAlbums_success () throws Exception{
+        Album album= Album.builder()
+                .id(1L)
+                .title("Album de Controller")
+                .build();
 
-        when(albumService.getAllAlbums(1, 1)).thenReturn(albumList);
+        PagedResponse<AlbumResponse> albumList = new PagedResponse(List.of(album),1,1,1,1,true);
+        when(albumService.getAllAlbums(any(Integer.class), any(Integer.class))).thenReturn(albumList);
 
 
+        System.out.println(albumList);
 
-
-        MvcResult mvcResult = mockMvc.perform(post("/api/albums")
+        MvcResult mvcResult = mockMvc.perform(get("/api/albums")
                 .contentType("application/json"))
-                .andExpect(status().isOk())
-                .andExpect((ResultMatcher)jsonPath("$.content[0].id", is(1)))
+                
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(content().json(objectMapper.writeValueAsString(albumList)))
-                .andReturn();
+                .andExpect(status().isOk()).andReturn();
     }
 }
