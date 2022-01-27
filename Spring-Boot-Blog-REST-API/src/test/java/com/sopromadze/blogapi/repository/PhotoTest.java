@@ -57,8 +57,6 @@ public class PhotoTest {
 
         testEntityManager.persist(photo);
 
-        
-
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
 
         assertNotEquals(0, repository.findByAlbumId(album.getId(), pageable).getTotalElements());
