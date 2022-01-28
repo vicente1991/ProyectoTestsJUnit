@@ -16,9 +16,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+//Repository
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+/*Controllers
+@AutoConfigureMockMvc
+@Log
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
+*/
 public class AlbumTest {
 
     @Autowired

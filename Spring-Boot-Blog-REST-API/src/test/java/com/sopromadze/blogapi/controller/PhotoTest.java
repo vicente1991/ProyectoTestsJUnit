@@ -7,11 +7,7 @@ import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
-import com.sopromadze.blogapi.payload.AlbumResponse;
-import com.sopromadze.blogapi.payload.ApiResponse;
-import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.payload.PhotoRequest;
-import com.sopromadze.blogapi.payload.request.AlbumRequest;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.AlbumService;
 import com.sopromadze.blogapi.service.PhotoService;
@@ -141,5 +137,14 @@ public class PhotoTest {
                 .contentType("application/json"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+
+    void whenDeletePhoto_Failed() throws Exception {
+        mockMvc.perform(delete("/api/photos/{id}",1)
+                        .contentType("application/json"))
+                .andExpect(status().isUnauthorized());
+    }
+
 
 }
