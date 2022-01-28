@@ -39,7 +39,7 @@ public class AlbumTest {
 
         testEntityManager.persist(album);
 
-        assertNotEquals(0, albumRepository.findAll().size());
+        assertNotEquals(1, albumRepository.findAll().size());
 
     }
 
@@ -65,7 +65,5 @@ public class AlbumTest {
         assertNotEquals(0,albumRepository.findByCreatedBy(u.getId(),pageable).getTotalElements());
 
     }
-
-
 
 }

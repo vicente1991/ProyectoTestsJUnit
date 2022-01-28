@@ -1,7 +1,5 @@
 package com.sopromadze.blogapi.service;
 
-
-import com.sopromadze.blogapi.model.Comment;
 import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.PagedResponse;
@@ -73,8 +71,6 @@ public class PostTest {
 
     @Test
     void whenGetPostCreated_Success(){
-
-
 
         Post p= new Post();
         p.setTitle("Nuevo Post");
