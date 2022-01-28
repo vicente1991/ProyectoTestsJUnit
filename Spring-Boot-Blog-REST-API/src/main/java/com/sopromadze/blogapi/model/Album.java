@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@Builder
 @Entity
 @Data
 @Table(name = "albums", uniqueConstraints = { @UniqueConstraint(columnNames = { "title" }) })
@@ -50,6 +49,9 @@ public class Album extends UserDateAudit {
 	@JsonIgnore
 	public User getUser() {
 		return user;
+	}
+
+	public Album() {
 	}
 
 	public List<Photo> getPhoto() {
