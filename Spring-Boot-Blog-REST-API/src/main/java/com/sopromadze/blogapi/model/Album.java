@@ -27,7 +27,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder
 @Table(name = "albums", uniqueConstraints = { @UniqueConstraint(columnNames = { "title" }) })
 public class Album extends UserDateAudit {
 	private static final long serialVersionUID = 1L;
