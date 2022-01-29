@@ -51,10 +51,6 @@ public class SpringSecurityTestWebConfig {
         return new InMemoryUserDetailsManager(List.of(adminP, userP));
 
 
-        UserPrincipal adminP = UserPrincipal.create(admin);
-
-        return new InMemoryUserDetailsManager(List.of(adminP, userP));
-
 
     }
 
