@@ -116,8 +116,7 @@ public class TodoControllerTest {
     @WithMockUser(authorities = {"ROLE_USER"})
     void whenPutTodoComplete_Succes() throws Exception {
         mockMvc.perform(put("/api/todos/{id}/complete",1)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(todo)))
+                        .contentType("application/json"))
                 .andExpect(status().isOk());
     }
 
@@ -125,8 +124,7 @@ public class TodoControllerTest {
     @WithMockUser(authorities = {"ROLE_USER"})
     void whenPutTodoUncomplete_Succes() throws Exception {
         mockMvc.perform(put("/api/todos/{id}/unComplete",1)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(todo)))
+                        .contentType("application/json"))
                 .andExpect(status().isOk());
     }
 
