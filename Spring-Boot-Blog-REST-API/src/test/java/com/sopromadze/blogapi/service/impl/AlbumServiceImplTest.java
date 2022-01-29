@@ -168,6 +168,8 @@ class AlbumServiceImplTest {
 
     }
 
+
+
     @Test
     void notAdmin_updateAlbum(){
         assertThat(albumService.updateAlbum(album2.getId(), albumRequest2, userPrincipal.create(user2)).equals(blogapiException));
