@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -38,7 +39,7 @@ public class AlbumTest {
 
         testEntityManager.persist(album);
 
-        assertNotEquals(0, albumRepository.findAll().size());
+        assertNotEquals(1, albumRepository.findAll().size());
 
     }
 
@@ -64,7 +65,5 @@ public class AlbumTest {
         assertNotEquals(0,albumRepository.findByCreatedBy(u.getId(),pageable).getTotalElements());
 
     }
-
-
 
 }

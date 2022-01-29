@@ -38,6 +38,7 @@ public class SpringSecurityTestWebConfig {
         admin.setRoles(ambosRoles);
 
 
+        UserPrincipal adminP = UserPrincipal.create(admin);
 
 
         User user = new User();
@@ -46,6 +47,10 @@ public class SpringSecurityTestWebConfig {
         user.setRoles(rol);
 
         UserPrincipal userP = UserPrincipal.create(user);
+
+        return new InMemoryUserDetailsManager(List.of(adminP, userP));
+
+
         UserPrincipal adminP = UserPrincipal.create(admin);
 
         return new InMemoryUserDetailsManager(List.of(adminP, userP));

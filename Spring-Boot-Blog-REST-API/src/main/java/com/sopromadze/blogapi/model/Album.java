@@ -52,6 +52,9 @@ public class Album extends UserDateAudit {
 		return user;
 	}
 
+	public Album() {
+	}
+
 	public List<Photo> getPhoto() {
 		return this.photo == null ? null : new ArrayList<>(this.photo);
 	}
