@@ -75,10 +75,9 @@ public class AlbumTest {
     PagedResponse<PhotoResponse> photoResponsePagedResponse;
     @BeforeEach
     void initTest() {
-        Album album = Album.builder()
-                .id(1L)
-                .title("Album de Controller")
-                .build();
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Album Controller");
 
 
 

@@ -33,7 +33,7 @@ public class VerifyDataJpaTest {
     @Test
     void test_findAll() {
 
-        Album album = Album.builder().build();
+        Album album = new Album();
         album.setTitle("Título");
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
