@@ -75,11 +75,9 @@ public class AlbumTest {
     PagedResponse<PhotoResponse> photoResponsePagedResponse;
     @BeforeEach
     void initTest() {
-        Album album = new Album();
-        album.setId(1L);
-        album.setTitle("Album Controller");
-
-
+        albumResult = new Album();
+        albumResult.setId(1L);
+        albumResult.setTitle("Album Controller");
 
 
         Role rol = new Role();
@@ -87,30 +85,25 @@ public class AlbumTest {
 
         List<Role> roles = Arrays.asList(rol);
 
-        User userPrueba = new User();
-        userPrueba.setId(3L);
-        userPrueba.setRoles(roles);
+        user = new User();
+        user.setId(3L);
+        user.setRoles(roles);
 
-        UserPrincipal Principal = UserPrincipal.builder()
-                .id(userPrueba.getId())
-                .authorities(userPrueba.getRoles().stream()
+        userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
         photoList=new ArrayList<>();
 
+        albumResponse = new AlbumResponse();
+        albumResponse.setId(20L);
+        albumResponse.setTitle("AlbumResponse");
+        albumResponse.setUser(user);
+        albumResponse.setPhoto(photoList);
 
 
-        AlbumResponse albumResponsePrueba = new AlbumResponse();
-        albumResponsePrueba.setId(20L);
-        albumResponsePrueba.setTitle("AlbumResponse");
-        albumResponsePrueba.setUser(userPrueba);
-        albumResponsePrueba.setPhoto(photoList);
-        albumResponse=albumResponsePrueba;
 
-        userPrincipal=Principal;
-        user=userPrueba;
-
-        albumResult = album;
         albumList = new PagedResponse(List.of(albumResult), 1, 1, 1, 1, true);
         albumRequest = AlbumRequest.builder().id(10L).user(user).title("Almbun nuevo y bonito").photo(photoList).build();
 
@@ -134,7 +127,7 @@ public class AlbumTest {
     }
 
 
-    @WithUserDetails("admin")
+
     @Test
     void getAllAlbums_success() throws Exception {
         when(albumService.getAllAlbums(1, 1)).thenReturn(albumList);
@@ -152,18 +145,11 @@ public class AlbumTest {
     @WithMockUser(authorities = {"ROLE_USER"})
     @Test
     void addAlbum_success() throws Exception {
-
-
-
-
         when(albumService.addAlbum(albumRequest, userPrincipal)).thenReturn(albumResult);
-
-
         mockMvc.perform(post("/api/albums")
                         .content(objectMapper.writeValueAsString(albumRequest))
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
-
     }
 
     @Test
