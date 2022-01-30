@@ -269,7 +269,7 @@ public class CategoryTest {
                 .authorities(user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
-        
+
         category.setId(4L);
         category.setCreatedBy(10L);
 
