@@ -26,10 +26,12 @@ class CommentRepositoryTest {
     @Autowired
     CommentRepository commentRepository;
 
+
+
     @Test
     void findByPostId() {
 
-        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, "createdAt");
 
         Page<Comment> comment = commentRepository.findByPostId(1L, pageable);
 

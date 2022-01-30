@@ -40,6 +40,7 @@ public class PhotoTest {
         Album album = Album.builder()
                 .title("Fotos")
                 .build();
+
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
 
