@@ -71,7 +71,7 @@ public class AlbumServiceImpl implements AlbumService {
 	public Album addAlbum(AlbumRequest albumRequest, UserPrincipal currentUser) {
 		User user = userRepository.getUser(currentUser);
 
-		Album album = Album.builder().build();
+		Album album = new Album();
 
 		modelMapper.map(albumRequest, album);
 

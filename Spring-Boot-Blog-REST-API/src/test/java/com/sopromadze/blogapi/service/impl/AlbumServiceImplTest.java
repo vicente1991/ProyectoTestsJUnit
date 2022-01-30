@@ -98,18 +98,16 @@ class AlbumServiceImplTest {
         user2.setRoles(roles2);
         user3.setRoles(roles2);
 
-        album = Album.builder()
-                .id(1L)
-                .title("Love Yourself : Tear")
-                .user(user)
-                .build();
+        album = new Album();
+        album.setId(1L);
+        album.setTitle("Love Yourself : Tear");
+        album.setUser(user);
 
-        album2 = Album.builder()
-                .id(5L)
-                .title("Love Yourself : Answer")
-                .user(user2)
-                .build();
 
+        album2 =  new Album();
+        album.setId(5L);
+        album.setTitle("Love Yourself : Answer");
+        album.setUser(user2);
 
         albumRequest = AlbumRequest.builder().user(user).build();
         albumRequest2 = AlbumRequest.builder().user(user2).build();
@@ -190,7 +188,6 @@ class AlbumServiceImplTest {
     @Test
     void updatesAlbum(){
         AlbumRequest nuevoAlbum = AlbumRequest.builder().title("Love Yourself 轉 'Tear'").build();
-
         album.setTitle(nuevoAlbum.getTitle());
 
         Album albumActualizado = album;
