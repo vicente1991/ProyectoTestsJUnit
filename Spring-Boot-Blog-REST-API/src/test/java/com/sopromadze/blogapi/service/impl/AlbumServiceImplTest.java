@@ -199,11 +199,10 @@ class AlbumServiceImplTest {
 
         AlbumResponse albumResponse = new AlbumResponse();
 
-        assertEquals(albumService.updateAlbum(1L, albumRequest, userPrincipal.create(user)), albumResponse);
+        assertEquals(albumService.updateAlbum(albumActualizado.getId(), albumRequest, userPrincipal.create(user)), albumResponse);
 
 
     }
-
 
 
     @Test
