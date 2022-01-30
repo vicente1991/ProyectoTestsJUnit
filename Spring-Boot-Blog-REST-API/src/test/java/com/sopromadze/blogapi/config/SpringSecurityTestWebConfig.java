@@ -28,14 +28,16 @@ public class SpringSecurityTestWebConfig {
         Role rol2 = new Role();
         rol2.setName(RoleName.ROLE_ADMIN);
 
-        List<Role> rol = Arrays.asList(rol1);
+        List<Role> rolUs = Arrays.asList(rol1);
 
-        List<Role> ambosRoles = Arrays.asList(rol1,rol2);
+        List<Role> rolAd = Arrays.asList(rol2);
+
+        List<Role> rolAmbos = Arrays.asList(rol1,rol2);
 
         User admin = new User();
         admin.setPassword("admin");
         admin.setUsername("admin");
-        admin.setRoles(ambosRoles);
+        admin.setRoles(rolAd);
 
 
         UserPrincipal adminP = UserPrincipal.create(admin);
@@ -44,9 +46,12 @@ public class SpringSecurityTestWebConfig {
         User user = new User();
         user.setPassword("user");
         user.setUsername("user");
-        user.setRoles(rol);
+        user.setRoles(rolUs);
 
         UserPrincipal userP = UserPrincipal.create(user);
+
+
+
 
         return new InMemoryUserDetailsManager(List.of(adminP, userP));
 
