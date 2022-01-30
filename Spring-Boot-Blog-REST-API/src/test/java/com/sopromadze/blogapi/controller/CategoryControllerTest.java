@@ -132,17 +132,6 @@ class CategoryControllerTest {
     }
 
     @Test
-    void getCategory_thenReturns404() throws Exception {
-
-        mockMvc.perform(get("/api/categories/{id}", 15L)
-                        .contentType("application/json"))
-                .andExpect(status().isNotFound()).andDo(print());
-
-        assertThrows(NotFoundException.class, () -> categoryService.getCategory(15L), "ID no existe");
-
-    }
-
-    @Test
     @WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
     void updateCategory_Success() throws Exception{
         when(categoryService.updateCategory(1L, category, userPrincipal)).thenReturn(category);
