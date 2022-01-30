@@ -187,6 +187,9 @@ class AlbumServiceImplTest {
 
     @Test
     void updatesAlbum(){
+
+        when(albumRepository.findById(any(Long.class))).thenReturn(Optional.of(album));
+
         AlbumRequest nuevoAlbum = AlbumRequest.builder().title("Love Yourself 轉 'Tear'").build();
         album.setTitle(nuevoAlbum.getTitle());
 
@@ -194,9 +197,13 @@ class AlbumServiceImplTest {
 
         when(albumRepository.save(any(Album.class))).thenReturn(albumActualizado);
 
+        when(userRepository.getUser(userPrincipal.create(user))).thenReturn(user);
+
         AlbumResponse albumResponse = new AlbumResponse();
 
-        assertEquals(albumService.updateAlbum(albumActualizado.getId(), albumRequest, userPrincipal.create(user)), albumResponse);
+        when(modelMapper.map(any(), any())).thenReturn(albumResponse);
+
+        assertThat(albumService.updateAlbum(albumActualizado.getId(), albumRequest, userPrincipal.create(user)));
 
 
     }

@@ -1,6 +1,8 @@
 package com.sopromadze.blogapi.repository;
 
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
+import com.sopromadze.blogapi.model.role.Role;
+import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +13,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,32 +27,36 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserRepositoryTest {
 
     @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     @Autowired
     private TestEntityManager testEntityManager;
 
     static User user;
     static UserPrincipal userPrincipal;
+    static List<Role> roles;
 
 
     @BeforeEach
     void initData (){
 
         user = new User ("Inmaculada", "Domínguez", "inmadv", "inma.dvgs@gmail.com", "12345");
-        user.setId(1L);
 
-        userPrincipal = UserPrincipal.builder()
-                                     .id(2L)
-                                     .firstName("Auxiliadora")
-                                     .username("auxivm")
-                                     .build();
+        roles = new ArrayList<Role>();
+        roles.add(new Role(RoleName.ROLE_ADMIN));
+
+        user.setRoles(roles);
+        user.setCreatedAt(Instant.now());
+        user.setUpdatedAt(Instant.now());
+
+        testEntityManager.persist(user);
+
 
     }
 
     @Test
     void findByUsername_Success() {
-        assertThat(userRepository.findByUsername("inmadv").isPresent());
+        assertEquals(userRepository.findByUsername("inmadv"), Optional.of(user));
     }
 
     @Test
@@ -55,7 +66,7 @@ class UserRepositoryTest {
 
     @Test
     void findByEmail_Success() {
-        assertThat(userRepository.findByEmail("inma.dvgs@gmail.com").isPresent());
+        assertEquals(userRepository.findByEmail("inma.dvgs@gmail.com"), Optional.of(user));
     }
 
     @Test
@@ -65,7 +76,7 @@ class UserRepositoryTest {
 
     @Test
     void existsByUsername_Success() {
-       assertThat(userRepository.existsByUsername("inmadv"));
+       assertEquals(userRepository.existsByUsername("inmadv"), true);
     }
 
     @Test
@@ -80,7 +91,10 @@ class UserRepositoryTest {
 
     @Test
     void getUser_Success() {
-        assertNotNull(userRepository.getUser(userPrincipal));
+
+        userPrincipal = UserPrincipal.create(user);
+
+        assertEquals(userRepository.getUser(userPrincipal), user);
     }
 
     @Test
