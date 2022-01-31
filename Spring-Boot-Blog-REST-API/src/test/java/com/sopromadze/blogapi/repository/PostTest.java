@@ -6,6 +6,7 @@ import com.sopromadze.blogapi.model.Tag;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -32,70 +33,80 @@ public class PostTest {
     @Autowired
     private TestEntityManager testEntityManager;
 
-    @Test
-    void test_findByCreatedBy() {
-        Post post = new Post();
+    Post post;
+    Pageable pageable;
+    Category category;
+    Tag tag;
+    Role rolAdmin;
+    User user;
+    @BeforeEach
+    void initTest() {
+
+
+        pageable = PageRequest.of(1, 1, Sort.Direction.DESC, "createdAt");
+
+        category = new Category();
+        category.setName("Nombre de Categoria");
+        category.setCreatedBy(10L);
+        category.setCreatedAt(Instant.now());
+        category.setUpdatedAt(Instant.now());
+
+        tag = new Tag();
+        tag.setName("Nombre del Tag");
+        tag.setCreatedAt(Instant.now());
+        tag.setUpdatedAt(Instant.now());
+
+        List<Tag> tagList = Arrays.asList(tag);
+
+        post = new Post();
         post.setTitle("Titulo Post");
         post.setBody("Cuerpo del Post");
         post.setCreatedBy(10L);
+        post.setCategory(category);
+        post.setTags(tagList);
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
 
+
+        rolAdmin = new Role();
+        rolAdmin.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roles = Arrays.asList(rolAdmin);
+
+        user = new User();
+        user.setUsername("Jucalox");
+        user.setRoles(roles);
+        user.setFirstName("Primer");
+        user.setLastName("Last");
+        user.setEmail("email@gmai.com");
+        user.setPassword("1234");
+        user.setCreatedAt(Instant.now());
+        user.setUpdatedAt(Instant.now());
+
+
+    }
+
+    @Test
+    void test_findByCreatedBy() {
+        testEntityManager.persist(category);
         testEntityManager.persist(post);
-
-        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, "createdAt");
-
         assertNotEquals(0,repository.findByCreatedBy(post.getCreatedBy(),pageable).getTotalElements());
     }
 
 
     @Test
     void test_findByCategory() {
-
-        Category category = new Category();
-        category.setName("Nombre de Categoria");
-        category.setCreatedBy(10L);
-        category.setCreatedAt(Instant.now());
-        category.setUpdatedAt(Instant.now());
         testEntityManager.persist(category);
-
-        Post post = new Post();
-        post.setTitle("Titulo Post");
-        post.setBody("Cuerpo del Post");
-        post.setCreatedBy(10L);
-        post.setCategory(category);
-        post.setCreatedAt(Instant.now());
-        post.setUpdatedAt(Instant.now());
         testEntityManager.persist(post);
-
-        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, "createdAt");
-
         assertNotEquals(0L, repository.findByCategoryId(category.getId(), pageable).getTotalElements());
     }
 
     @Test
     void test_findByTagsIn() {
-
-        Tag tag = new Tag();
-        tag.setName("Nombre del Tag");
-        tag.setCreatedAt(Instant.now());
-        tag.setUpdatedAt(Instant.now());
-
+        testEntityManager.persist(category);
         testEntityManager.persist(tag);
         List<Tag> tagList = Arrays.asList(tag);
-
-
-        Post post = new Post();
-        post.setTitle("Titulo Post");
-        post.setBody("Cuerpo del Post");
-        post.setCreatedBy(10L);
-        post.setTags(tagList);
-        post.setCreatedAt(Instant.now());
-        post.setUpdatedAt(Instant.now());
         testEntityManager.persist(post);
-
-        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, "createdAt");
-
         assertNotEquals(0L,repository.findByTagsIn(tagList,pageable).getTotalElements());
     }
 
