@@ -32,7 +32,7 @@ public class SpringSecurityTestWebConfig {
 
         List<Role> rolAd = Arrays.asList(rol2);
 
-        List<Role> rolAmbos = Arrays.asList(rol1,rol2);
+        //List<Role> rolAmbos = Arrays.asList(rol1,rol2);
 
         User admin = new User();
         admin.setPassword("admin");
