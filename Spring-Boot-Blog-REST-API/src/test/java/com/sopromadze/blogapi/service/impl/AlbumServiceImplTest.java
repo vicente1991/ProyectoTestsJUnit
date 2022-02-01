@@ -209,7 +209,7 @@ class AlbumServiceImplTest {
 
         AlbumResponse albumResponse = new AlbumResponse();
 
-        when(modelMapper.map(any(), any())).thenReturn(albumResponse);
+       // when(modelMapper.map(any(), any())).thenReturn(albumResponse);
 
         assertThat(albumService.updateAlbum(albumActualizado.getId(), albumRequest, userPrincipal.create(user)));
 

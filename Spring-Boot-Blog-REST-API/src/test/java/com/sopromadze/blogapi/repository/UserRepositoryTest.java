@@ -61,7 +61,7 @@ class UserRepositoryTest {
 
     @Test
     void findByUsername_Fail() {
-        assertThat(userRepository.findByUsername("holaquetal").isEmpty());
+        assertTrue(userRepository.findByUsername("holaquetal").isEmpty());
     }
 
     @Test
@@ -71,7 +71,7 @@ class UserRepositoryTest {
 
     @Test
     void findByEmail_Fail() {
-        assertThat(userRepository.findByEmail("inmadvgs@gmaill.com").isEmpty());
+        assertTrue(userRepository.findByEmail("inmadvgs@gmaill.com").isEmpty());
     }
 
     @Test
@@ -81,12 +81,12 @@ class UserRepositoryTest {
 
     @Test
     void existsByEmail_Success() {
-        assertThat(userRepository.existsByEmail("inma.dvgs@gmail.com"));
+        assertTrue(userRepository.existsByEmail("inma.dvgs@gmail.com"));
     }
 
     @Test
     void findByUsernameOrEmail_Success() {
-        assertThat(userRepository.findByUsernameOrEmail("inmadv", "inma.dvgs@gmail.com").isPresent());
+        assertTrue(userRepository.findByUsernameOrEmail("inmadv", "inma.dvgs@gmail.com").isPresent());
     }
 
     @Test

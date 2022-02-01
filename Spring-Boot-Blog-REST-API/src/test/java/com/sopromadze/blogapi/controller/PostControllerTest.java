@@ -2,6 +2,8 @@ package com.sopromadze.blogapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sopromadze.blogapi.config.SpringSecurityTestWebConfig;
+import com.sopromadze.blogapi.exception.BadRequestException;
+import com.sopromadze.blogapi.exception.UnauthorizedException;
 import com.sopromadze.blogapi.model.Category;
 import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.Tag;
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,7 +60,7 @@ class PostControllerTest {
     static Category category;
     static Tag tag;
     static PostResponse postResponse;
-    static UserPrincipal userPrincipal;
+    static UserPrincipal userPrincipal, userPrincipal2;
     static PostRequest postRequest;
     static ApiResponse apiResponse;
 
@@ -81,10 +84,15 @@ class PostControllerTest {
 
 
         userPrincipal = UserPrincipal.builder()
-                .id(2L)
-                .username("user")
-                .authorities(List.of(new SimpleGrantedAuthority(RoleName.ROLE_USER.toString())))
-                .build();
+                                        .id(2L)
+                                        .username("user")
+                                        .authorities(List.of(new SimpleGrantedAuthority(RoleName.ROLE_USER.toString())))
+                                        .build();
+
+        userPrincipal2 = UserPrincipal.builder()
+                                        .id(4L)
+                                        .authorities(new ArrayList<>())
+                                        .build();
 
         postRequest = new PostRequest();
 
@@ -98,7 +106,6 @@ class PostControllerTest {
 
     }
 
-//Comprobar las badRequest, los notfound y los unauthorized
     @Test
     void getAllPosts_Success() throws Exception{
 
@@ -135,7 +142,7 @@ class PostControllerTest {
 
         when(postService.getPostsByTagId(3L, 1, 1)).thenReturn(postPagedResponse);
 
-        mockMvc.perform(get("/api/posts/category/{id}", 3L)
+        mockMvc.perform(get("/api/posts/tag/{id}", 3L)
                         .param("page", "1")
                         .param("size", "1")
                         .contentType("application/json")
@@ -164,6 +171,20 @@ class PostControllerTest {
                 .andExpect(status().isCreated()).andDo(print());
     }
 
+
+    @Test
+    void addPost_throwsUnauthorized () throws Exception {
+
+        when(postService.addPost(postRequest, userPrincipal2)).thenThrow(UnauthorizedException.class);
+
+        mockMvc.perform(post("/api/posts")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(postRequest)))
+                .andExpect(status().isUnauthorized()).andDo(print());
+
+
+    }
+
     @Test
     void getPost_Success() throws Exception{
 
@@ -178,7 +199,7 @@ class PostControllerTest {
 
     @Test
     @WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
-    void updatePost() throws Exception{
+    void updatePost_Success() throws Exception{
 
         Post updateAlbum = new Post();
         updateAlbum.setTitle("Post actualizado");
@@ -194,8 +215,20 @@ class PostControllerTest {
     }
 
     @Test
+    void updatePost_throwsUnauthorized () throws Exception {
+
+        when(postService.updatePost(1L, postRequest, userPrincipal2)).thenThrow(UnauthorizedException.class);
+
+        mockMvc.perform(put("/api/posts/{id}", 1L)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(postRequest)))
+                .andExpect(status().isUnauthorized()).andDo(print());
+
+    }
+
+    @Test
     @WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
-    void deletePost() throws Exception{
+    void deletePost_Success() throws Exception{
 
         when(postService.deletePost(1L, userPrincipal)).thenReturn(apiResponse);
 
@@ -204,6 +237,17 @@ class PostControllerTest {
                         .content(objectMapper.writeValueAsString(postRequest)))
                 .andExpect(status().isOk()).andDo(print());
 
+    }
+
+    @Test
+    void deletePost_throwsUnauthorized() throws Exception{
+
+        when(postService.deletePost(1L, userPrincipal2)).thenThrow(UnauthorizedException.class);
+
+        mockMvc.perform(delete("/api/posts/{id}", 1L)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(postRequest)))
+                .andExpect(status().isUnauthorized()).andDo(print());
 
     }
 }
