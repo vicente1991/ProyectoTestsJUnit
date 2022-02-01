@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ExtendWith(SpringExtension.class)
-public class CategoryTest {
+public class CategoryServiceTest {
 
     @Mock
     CategoryRepository categoryRepository;

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class RoleTest {
+public class RoleRepositoryTest {
 
     @Autowired
     private RoleRepository repository;

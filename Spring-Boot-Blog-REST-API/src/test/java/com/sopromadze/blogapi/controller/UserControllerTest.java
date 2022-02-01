@@ -39,7 +39,7 @@ import java.time.Instant;
 @AutoConfigureMockMvc
 @Log
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
-public class UserTest {
+public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -164,6 +164,7 @@ public class UserTest {
         mockMvc.perform(get("/api/users/checkUsernameAvailability")
                 .param("username","user")
                 .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(userIdentityAvailability)))
                 .andExpect(status().isOk()).andDo(print());
 
     }
@@ -182,6 +183,7 @@ public class UserTest {
         when(userService.getUserProfile("user")).thenReturn(userProfile);
         mockMvc.perform(get("/api/users/{username}/profile", "user")
                         .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(userProfile)))
                 .andExpect(status().isOk()).andDo(print());
     }
 
@@ -192,6 +194,7 @@ public class UserTest {
                         .param("page", "1")
                         .param("size", "1")
                         .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(postPagedResponse)))
                 .andExpect(status().isOk()).andDo(print());
     }
 
@@ -202,6 +205,7 @@ public class UserTest {
                         .param("page", "1")
                         .param("size", "1")
                         .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(albumPagedResponse)))
                 .andExpect(status().isOk()).andDo(print());
     }
 
@@ -312,6 +316,7 @@ public class UserTest {
         when(userService.giveAdmin("user2")).thenReturn(apiResponse);
         mockMvc.perform(put("/api/users/{username}/giveAdmin","user2")
                 .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(apiResponse)))
                 .andExpect(status().isOk()).andDo(print());
     }
 
@@ -339,6 +344,7 @@ public class UserTest {
         when(userService.removeAdmin("user2")).thenReturn(apiResponse);
         mockMvc.perform(put("/api/users/{username}/takeAdmin","user2")
                         .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(apiResponse)))
                 .andExpect(status().isOk()).andDo(print());
     }
 

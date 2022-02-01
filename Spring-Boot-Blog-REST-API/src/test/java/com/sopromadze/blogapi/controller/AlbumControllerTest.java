@@ -55,7 +55,7 @@ import static org.mockito.ArgumentMatchers.eq;
 @AutoConfigureMockMvc
 @Log
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
-public class AlbumTest {
+public class AlbumControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -119,11 +119,6 @@ public class AlbumTest {
         Page<Photo> photos= Page.empty();
 
         List<PhotoResponse> photoResponses = new ArrayList<>(photos.getContent().size());
-        for (Photo photo : photos.getContent()) {
-            photoResponses.add(new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
-                    photo.getThumbnailUrl(), photo.getAlbum().getId()));
-        }
-
 
         photoResponsePagedResponse = new PagedResponse<>(photoResponses, photos.getNumber(), photos.getSize(), photos.getTotalElements(),
                 photos.getTotalPages(), photos.isLast());

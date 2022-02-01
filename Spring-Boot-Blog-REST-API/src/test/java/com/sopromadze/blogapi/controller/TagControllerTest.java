@@ -2,27 +2,25 @@ package com.sopromadze.blogapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sopromadze.blogapi.config.SpringSecurityTestWebConfig;
-import com.sopromadze.blogapi.model.Comment;
-import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.Tag;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.AlbumResponse;
 import com.sopromadze.blogapi.payload.ApiResponse;
-import com.sopromadze.blogapi.payload.CommentRequest;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.security.UserPrincipal;
-import com.sopromadze.blogapi.service.CommentService;
+import com.sopromadze.blogapi.service.TagService;
 import lombok.extern.java.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -39,7 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Log
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
-public class CommentTest {
+public class
+TagControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -47,31 +47,24 @@ public class CommentTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CommentService commentService;
+    private TagService tagService;
 
-
-    PagedResponse<Comment> commentList;
-    Comment comment;
-    Post post;
+    Tag tag;
+    PagedResponse<Tag> tagList;
     User user;
     Role rolAdmin;
     Role rolUser;
-    CommentRequest commentRequest;
+    Tag tagRequest;
     ApiResponse apiResponse;
 
     @BeforeEach
     void initTest() {
-        post = new Post();
-        post.setId(1L);
 
-        comment = new Comment();
-        comment.setName("Nombre del comentario");
-        comment.setBody("Cuerpo del comentario");
-        comment.setId(1L);
-        comment.setPost(post);
+        tag = new Tag();
+        tag.setName("Nombre Tag");
+        tag.setId(1L);
 
-        commentList = new PagedResponse(List.of(comment), 1, 1, 1, 1, true);
-
+        tagList = new PagedResponse(List.of(tag), 1, 1, 1, 1, true);
 
         user =  new User();
         user.setUsername("user");
@@ -83,35 +76,31 @@ public class CommentTest {
         rolUser = new Role();
         rolUser.setName(RoleName.ROLE_USER);
 
-        commentRequest = new CommentRequest();
-        commentRequest.setBody("Cuerpo del comentario");
-
-
+        tagRequest = new Tag();
+        tagRequest.setName("Tag cambiada");
+        tagRequest.setId(1L);
 
         apiResponse = new ApiResponse();
         apiResponse.setSuccess(true);
-        apiResponse.setStatus(HttpStatus.OK);
-        apiResponse.setMessage("You successfully deleted comment");
-
-
-
+        apiResponse.setMessage("You successfully deleted tag");
     }
 
     @Test
-    void getAllComments_success() throws Exception {
-        when(commentService.getAllComments(1L,1,1)).thenReturn(commentList);
-        mockMvc.perform(get("/api/posts/{postId}/comments",1L)
+    void getAllTags_success() throws Exception {
+        when(tagService.getAllTags(1,1)).thenReturn(tagList);
+
+        mockMvc.perform(get("/api/tags")
                         .param("page", "1")
                         .param("size", "1")
                         .contentType("application/json"))
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(content().json(objectMapper.writeValueAsString(commentList)))
+                .andExpect(content().json(objectMapper.writeValueAsString(tagList)))
                 .andExpect(status().isOk()).andDo(print());
     }
 
     @WithUserDetails("user")
     @Test
-    void addComment_success() throws Exception {
+    void addTag_success() throws Exception {
         List<Role> roles = Arrays.asList(rolUser);
         user.setId(3L);
         user.setRoles(roles);
@@ -122,43 +111,43 @@ public class CommentTest {
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
 
-        when(commentService.addComment(commentRequest,1L, userPrincipal)).thenReturn(comment);
-        mockMvc.perform(post("/api/posts/{postId}/comments",1L)
-                        .content(objectMapper.writeValueAsString(commentRequest))
+        when(tagService.addTag(tag, userPrincipal)).thenReturn(tag);
+        mockMvc.perform(post("/api/tags")
+                        .content(objectMapper.writeValueAsString(tag))
                         .contentType("application/json"))
                 .andExpect(status().isCreated()).andDo(print());
     }
 
     @Test
-    void addComment_thenReturn401() throws Exception {
-        mockMvc.perform(post("/api/posts/{postId}/comments",1L)
-                        .content(objectMapper.writeValueAsString(commentRequest))
+    void addTag_thenReturn401() throws Exception {
+        mockMvc.perform(post("/api/tags")
+                        .content(objectMapper.writeValueAsString(tag))
                         .contentType("application/json"))
                 .andExpect(status().isUnauthorized()).andDo(print());
     }
 
     @WithUserDetails("admin")
     @Test
-    void addComment_thenReturn403() throws Exception {
-        mockMvc.perform(post("/api/posts/{postId}/comments",1L)
-                        .content(objectMapper.writeValueAsString(commentRequest))
+    void addTag_thenReturn403() throws Exception {
+
+        mockMvc.perform(post("/api/tags")
+                        .content(objectMapper.writeValueAsString(tag))
                         .contentType("application/json"))
                 .andExpect(status().isForbidden()).andDo(print());
     }
 
-
     @Test
-    void getComment_success() throws Exception {
-        when(commentService.getComment(1L,1L)).thenReturn(comment);
-        mockMvc.perform(get("/api/posts/{postId}/comments/{id}",1L,1L)
+    void getTag_success() throws Exception {
+        when(tagService.getTag(1L)).thenReturn(tag);
+        mockMvc.perform(get("/api/tags/{id}",1L)
                         .contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isOk()).andDo(print());
     }
 
-
     @WithUserDetails("user")
     @Test
-    void updateComment_success() throws Exception {
+    void updateTag_success() throws Exception {
 
         List<Role> roles = Arrays.asList(rolUser, rolAdmin);
         user.setId(3L);
@@ -170,18 +159,18 @@ public class CommentTest {
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
 
-        when(commentService.updateComment(1L,1L,commentRequest,userPrincipal)).thenReturn(comment);
+        when(tagService.updateTag(1L,tagRequest,userPrincipal)).thenReturn(tag);
 
-        mockMvc.perform(put("/api/posts/{postId}/comments/{id}",1L,1L)
-                        .content(objectMapper.writeValueAsString(commentRequest))
+        mockMvc.perform(put("/api/tags/{id}",1L)
+                        .content(objectMapper.writeValueAsString(tagRequest))
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
     }
 
     @Test
-    void updateComment_thenReturn401() throws Exception {
-        mockMvc.perform(put("/api/posts/{postId}/comments/{id}",1L,1L)
-                        .content(objectMapper.writeValueAsString(commentRequest))
+    void updateTag_thenReturn401() throws Exception {
+        mockMvc.perform(put("/api/albums/{id}",1L)
+                        .content(objectMapper.writeValueAsString(tagRequest))
                         .contentType("application/json"))
                 .andExpect(status().isUnauthorized()).andDo(print());
     }
@@ -189,7 +178,7 @@ public class CommentTest {
 
     @WithUserDetails("admin")
     @Test
-    void deleteComment_success() throws Exception {
+    void deleteAlbum_success() throws Exception {
 
         List<Role> roles = Arrays.asList(rolUser, rolAdmin);
         user.setId(3L);
@@ -201,16 +190,15 @@ public class CommentTest {
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
 
-        comment.setUser(user);
-        when(commentService.deleteComment(1L,1L,userPrincipal)).thenReturn(apiResponse);
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{id}",1L,1L)
+        when(tagService.deleteTag(1L,userPrincipal)).thenReturn(apiResponse);
+        mockMvc.perform(delete("/api/tags/{id}",1L)
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
     }
 
     @Test
-    void deleteComment_thenReturn401() throws Exception {
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{id}",1L,1L)
+    void deleteAlbum_thenReturn401() throws Exception {
+        mockMvc.perform(delete("/api/tags/{id}",1L)
                         .contentType("application/json"))
                 .andExpect(status().isUnauthorized()).andDo(print());
     }
