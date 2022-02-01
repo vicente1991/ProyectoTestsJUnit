@@ -1,5 +1,6 @@
 package com.sopromadze.blogapi.service;
 
+import com.sopromadze.blogapi.exception.BlogapiException;
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.model.Comment;
 import com.sopromadze.blogapi.model.Post;
@@ -245,8 +246,102 @@ public class CommentTest {
         Comment c2= commentRepository.save(c);
         assertEquals(c,c2);
     }
+
     @Test
-    void deleteComment_throwResourceNotFoundException(){
+    void updateComment_throwsResourceNotFoundExceptionForPost(){
+
+        Post p = new Post();
+        p.setId(1L);
+        p.setTitle("Post Nuevo");
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User u= new User();
+        u.setId(1L);
+        u.setRoles(roles);
+        u.setFirstName("Vicente");
+        u.setLastName("Rufo Bru");
+        u.setEmail("Vicente@mail.com");
+        u.setUsername("Vicent");
+
+        Comment c= new Comment();
+        c.setName("Comentario 1");
+        c.setId(1L);
+        c.setPost(p);
+        c.setEmail("Vicente@mail.com");
+        c.setBody("Hola que tal");
+        c.setUser(u);
+
+        CommentRequest cr= new CommentRequest();
+        cr.setBody("nuevo comment");
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(2L)
+                .authorities(u.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(false);
+        apiResponse.setMessage("You don't have permission to delete this comment");
+
+        lenient().when(postRepository.findById(22L)).thenReturn(java.util.Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()->commentService.updateComment(22L, c.getId(),cr,userPrincipal));
+
+    }
+
+    @Test
+    void updateComment_throwsResourceNotFoundExceptionForComment(){
+
+        Post p = new Post();
+        p.setId(1L);
+        p.setTitle("Post Nuevo");
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User u= new User();
+        u.setId(1L);
+        u.setRoles(roles);
+        u.setFirstName("Vicente");
+        u.setLastName("Rufo Bru");
+        u.setEmail("Vicente@mail.com");
+        u.setUsername("Vicent");
+
+        Comment c= new Comment();
+        c.setName("Comentario 1");
+        c.setId(1L);
+        c.setPost(p);
+        c.setEmail("Vicente@mail.com");
+        c.setBody("Hola que tal");
+        c.setUser(u);
+
+        CommentRequest cr= new CommentRequest();
+        cr.setBody("nuevo comment");
+
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(2L)
+                .authorities(u.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(false);
+        apiResponse.setMessage("You don't have permission to delete this comment");
+
+        lenient().when(commentRepository.findById(22L)).thenReturn(java.util.Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()->commentService.updateComment(p.getId(), 22L,cr,userPrincipal));
+
+    }
+
+    @Test
+    void deleteComment_throwsBlogapiException(){
 
         Post p = new Post();
         p.setId(1L);
@@ -280,18 +375,151 @@ public class CommentTest {
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
 
-        ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException("a", "x", 1L);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(false);
+        apiResponse.setMessage("You don't have permission to delete this comment");
+
+        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.of(p));
+        lenient().when(commentRepository.findById(c.getId())).thenReturn(java.util.Optional.of(c));
+        lenient().when(commentRepository.save(c)).thenReturn(c);
+        assertThrows(BlogapiException.class, ()->commentService.deleteComment(p.getId(), c.getId(),userPrincipal));
+
+    }
+
+    @Test
+    void deleteComment_throwsResourceNotFoundExceptionForPost(){
+
+        Post p = new Post();
+        p.setId(1L);
+        p.setTitle("Post Nuevo");
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User u= new User();
+        u.setId(1L);
+        u.setRoles(roles);
+        u.setFirstName("Vicente");
+        u.setLastName("Rufo Bru");
+        u.setEmail("Vicente@mail.com");
+        u.setUsername("Vicent");
+
+        Comment c= new Comment();
+        c.setName("Comentario 1");
+        c.setId(1L);
+        c.setPost(p);
+        c.setEmail("Vicente@mail.com");
+        c.setBody("Hola que tal");
+        c.setUser(u);
+
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(2L)
+                .authorities(u.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setSuccess(false);
         apiResponse.setMessage("You don't have permission to delete this comment");
 
-        lenient().when(postRepository.findById(1L)).thenReturn(java.util.Optional.of(p));
-        lenient().when(commentRepository.findById(1L)).thenReturn(java.util.Optional.of(c));
-        //lenient().when(commentRepository.deleteById(c.getId()));
-        assertThrows(resourceNotFoundException.getClass(), ()->commentRepository.deleteById(0L));
+        lenient().when(postRepository.findById(22L)).thenReturn(java.util.Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()->commentService.deleteComment(22L, c.getId(),userPrincipal));
 
     }
 
+    @Test
+    void deleteComment_throwsResourceNotFoundExceptionForComment(){
+
+        Post p = new Post();
+        p.setId(1L);
+        p.setTitle("Post Nuevo");
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User u= new User();
+        u.setId(1L);
+        u.setRoles(roles);
+        u.setFirstName("Vicente");
+        u.setLastName("Rufo Bru");
+        u.setEmail("Vicente@mail.com");
+        u.setUsername("Vicent");
+
+        Comment c= new Comment();
+        c.setName("Comentario 1");
+        c.setId(1L);
+        c.setPost(p);
+        c.setEmail("Vicente@mail.com");
+        c.setBody("Hola que tal");
+        c.setUser(u);
+
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(2L)
+                .authorities(u.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(false);
+        apiResponse.setMessage("You don't have permission to delete this comment");
+
+        lenient().when(commentRepository.findById(22L)).thenReturn(java.util.Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()->commentService.deleteComment(p.getId(), 22L,userPrincipal));
+
+    }
+    @Test
+    void updateComment_throwsBlogapiException(){
+
+        Post p = new Post();
+        p.setId(1L);
+        p.setTitle("Post Nuevo");
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User u= new User();
+        u.setId(1L);
+        u.setRoles(roles);
+        u.setFirstName("Vicente");
+        u.setLastName("Rufo Bru");
+        u.setEmail("Vicente@mail.com");
+        u.setUsername("Vicent");
+
+        Comment c= new Comment();
+        c.setName("Comentario 1");
+        c.setId(1L);
+        c.setPost(p);
+        c.setEmail("Vicente@mail.com");
+        c.setBody("Hola que tal");
+        c.setUser(u);
+
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(2L)
+                .authorities(u.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        CommentRequest cr= new CommentRequest();
+        cr.setBody("nuevo comment");
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setSuccess(false);
+        apiResponse.setMessage("You don't have permission to delete this comment");
+
+        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.of(p));
+        lenient().when(commentRepository.findById(c.getId())).thenReturn(java.util.Optional.of(c));
+        lenient().when(commentRepository.save(c)).thenReturn(c);
+        assertThrows(BlogapiException.class, ()->commentService.updateComment(p.getId(), c.getId(),cr,userPrincipal));
+
+    }
 
 }
