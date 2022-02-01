@@ -62,212 +62,201 @@ public class PostTest {
     PostServiceImpl postService;
 
 
-    private Post p;
-    private Page<Post> res;
-    private PagedResponse<Post> pagedResponse;
-    private User u;
-    private UserPrincipal up;
-    private PostRequest postRequest;
-    private PostResponse postResponse;
-    private Tag tag;
-    private Category category;
-    private List<Post> content;
-    private Pageable pageable;
-    private Page<Tag> lisTag;
-    private ApiResponse apiResponse;
+        private Post p;
+        private Page<Post> res;
+        private PagedResponse<Post> pagedResponse;
+        private User u;
+        private UserPrincipal up;
+        private PostRequest postRequest;
+        private PostResponse postResponse;
+        private Tag tag;
+        private Category category;
+        private List<Post> content;
+        private Pageable pageable;
+        private Page<Tag> lisTag;
+        private ApiResponse apiResponse;
 
-    @BeforeEach
-    void init(){
-
-
-        category= new Category();
-        category.setId(1L);
-        category.setName("Nueva");
-        category.setPosts(content);
-        category.setCreatedAt(Instant.now());
-        category.setUpdatedAt(Instant.now());
-
-        postRequest= new PostRequest();
-        postRequest.setCategoryId(category.getId());
-        postRequest.setBody("bla");
-        postRequest.setTitle("PostR");
-
-        Role rol = new Role();
-        rol.setName(RoleName.ROLE_USER);
-
-        List<Role> roles = Arrays.asList(rol);
-
-        u=new User();
-        u.setUsername("Vicente");
-        u.setId(1L);
-        u.setRoles(roles);
-
-        up = UserPrincipal.builder()
-                .id(2L)
-                .authorities(u.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
-                .build();
-
-        p = new Post();
-        p.setTitle("Nuevo Post");
-        p.setId(1L);
-        p.setCreatedBy(1L);
-        p.setCategory(category);
-        p.setUser(u);
-        p.setCreatedAt(Instant.now());
-        p.setUpdatedAt(Instant.now());
+        @BeforeEach
+        void init(){
 
 
-        tag= new Tag();
-        tag.setId(1L);
-        tag.setPosts(content);
-        tag.setName("TagTag");
-        tag.setCreatedAt(Instant.now());
-        tag.setUpdatedAt(Instant.now());
+            category= new Category();
+            category.setId(1L);
+            category.setName("Nueva");
+            category.setPosts(content);
+            category.setCreatedAt(Instant.now());
+            category.setUpdatedAt(Instant.now());
 
-        pagedResponse = new PagedResponse<>();
+            postRequest= new PostRequest();
+            postRequest.setCategoryId(category.getId());
+            postRequest.setBody("bla");
+            postRequest.setTitle("PostR");
 
-        pagedResponse.setContent(content);
-        pagedResponse.setTotalPages(1);
-        pagedResponse.setTotalElements(1);
-        pagedResponse.setPage(1);
-        pagedResponse.setLast(true);
-        pagedResponse.setSize(1);
+            Role rol = new Role();
+            rol.setName(RoleName.ROLE_USER);
 
-        postResponse= new PostResponse();
-        postResponse.setTitle("Creo");
-        postResponse.setTags(List.of(tag.getName()));
-        postResponse.setCategory("crear");
-        postResponse.setBody("Creando");
+            List<Role> roles = Arrays.asList(rol);
 
-        apiResponse = new ApiResponse();
-        apiResponse.setSuccess(false);
-        apiResponse.setMessage("You don't have permission to delete this tag");
+            u=new User();
+            u.setUsername("Vicente");
+            u.setId(1L);
+            u.setRoles(roles);
 
-        pageable= PageRequest.of(1,1);
+            up = UserPrincipal.builder()
+                    .id(2L)
+                    .authorities(u.getRoles().stream()
+                            .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                    .build();
 
-        lisTag= new PageImpl<>(Arrays.asList(tag));
-        res= new PageImpl<>(Arrays.asList(p));
+            p = new Post();
+            p.setTitle("Nuevo Post");
+            p.setId(1L);
+            p.setCreatedBy(1L);
+            p.setCategory(category);
+            p.setUser(u);
+            p.setCreatedAt(Instant.now());
+            p.setUpdatedAt(Instant.now());
 
-        content = res.getNumberOfElements() == 0 ? Collections.emptyList() : res.getContent();
+
+            tag= new Tag();
+            tag.setId(1L);
+            tag.setPosts(content);
+            tag.setName("TagTag");
+            tag.setCreatedAt(Instant.now());
+            tag.setUpdatedAt(Instant.now());
+
+            pagedResponse = new PagedResponse<>();
+
+            pagedResponse.setContent(content);
+            pagedResponse.setTotalPages(1);
+            pagedResponse.setTotalElements(1);
+            pagedResponse.setPage(1);
+            pagedResponse.setLast(true);
+            pagedResponse.setSize(1);
+
+            postResponse= new PostResponse();
+            postResponse.setTitle("Creo");
+            postResponse.setTags(List.of(tag.getName()));
+            postResponse.setCategory("crear");
+            postResponse.setBody("Creando");
+
+            apiResponse = new ApiResponse();
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("You don't have permission to delete this tag");
+
+            pageable= PageRequest.of(1,1);
+
+            lisTag= new PageImpl<>(Arrays.asList(tag));
+            res= new PageImpl<>(Arrays.asList(p));
+
+            content = res.getNumberOfElements() == 0 ? Collections.emptyList() : res.getContent();
+
+        }
+
+
+        @Test
+        void whengetAllPost_Success(){
+
+            when(postRepository.findAll(any(Pageable.class))).thenReturn(res);
+            assertEquals(pagedResponse, postService.getAllPosts(1, 1));
+        }
+
+
+        @Test
+            //FALLA
+        void whenGetPostCreated_Success(){
+
+            lenient().when(userRepository.getUserByName(u.getUsername())).thenReturn(u);
+            lenient().when(postRepository.findByCreatedBy(Mockito.any(),Mockito.any())).thenReturn(res);
+            assertEquals(pagedResponse,postService.getPostsByCreatedBy("Vicente",1,1));
+        }
+
+        @Test
+            //FALLA
+        void whenGetPostByCategory(){
+            lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
+            lenient().when(postRepository.findByCategory(Mockito.any(),Mockito.any())).thenReturn(res);
+            assertEquals(pagedResponse,postService.getPostsByCategory(category.getId(),1,1));
+        }
+
+        @Test
+            //FALLA
+        void whenGetPostByTag(){
+            lenient().when(tagRepository.findById(tag.getId())).thenReturn(java.util.Optional.ofNullable(tag));
+            //lenient().when(postRepository.findByTagsIn()).thenReturn(res);
+
+        }
+
+        @Test
+        void whenUpdatePost_ResourceNotFoundExceptionForPost(){
+            lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
+            assertThrows(ResourceNotFoundException.class,()->postService.updatePost(p.getId(),postRequest,up));
+        }
+
+        @Test
+        void whenUpdatePost_ResourceNotFoundExceptionForCategory(){
+            lenient().when(categoryRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(category));
+            assertThrows(ResourceNotFoundException.class,()->postService.updatePost(p.getId(),postRequest,up));
+        }
+
+        @Test
+        void whenUpdatePost(){
+            lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
+            lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
+            lenient().when(postRepository.save(p)).thenReturn(p);
+            assertThrows(UnauthorizedException.class,()->postService.updatePost(p.getId(),postRequest,up));
+        }
+
+        @Test
+        void whenDeletePost_ResourceNotFoundExceptionForPost(){
+            lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
+            assertThrows(ResourceNotFoundException.class,()->postService.deletePost(22L,up));
+        }
+
+        @Test
+        void whenDeletePost(){
+            lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
+            assertThrows(UnauthorizedException.class,()->postService.deletePost(p.getId(),up));
+        }
+
+        @Test
+            //FALLA
+        void whenAddPost(){
+            lenient().when(userRepository.findById(u.getId())).thenReturn(java.util.Optional.ofNullable(u));
+            lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
+            lenient().when(tagRepository.findByName(tag.getName())).thenReturn(tag);
+            //lenient().when(tagRepository.save(tag));
+            //lenient().when(postRepository.save(p));
+            System.out.println(postService.addPost(postRequest,up));
+            System.out.println(postResponse);
+            //assertEquals(postService.addPost(postRequest,up),postResponse);
+        }
+
+        @Test
+        void whenAddPost_ResourceNotFoundExceptionForUser(){
+            lenient().when(userRepository.findById(u.getId())).thenReturn(java.util.Optional.ofNullable(u));
+            assertThrows(ResourceNotFoundException.class,()->postService.addPost(postRequest,up));
+        }
+
+        @Test
+        void whenAddPost_ResourceNotFoundExceptionForCategory(){
+            lenient().when(categoryRepository.findById(postRequest.getCategoryId())).thenReturn(java.util.Optional.ofNullable(category));
+            assertThrows(ResourceNotFoundException.class,()->postService.addPost(postRequest,up));
+        }
+
+        @Test
+        void whenGetPost(){
+
+            lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
+            assertEquals(postService.getPost(p.getId()), p);
+        }
+
+        @Test
+        void whengetPost_ResourceNotFoundException(){
+
+            lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
+            assertThrows(ResourceNotFoundException.class,()->postService.deletePost(22L,up));
+        }
 
     }
-
-
-    @Test
-    void whengetAllPost_Success(){
-
-        when(postRepository.findAll(any(Pageable.class))).thenReturn(res);
-        assertEquals(pagedResponse, postService.getAllPosts(1, 1));
-    }
-
-<<<<<<< HEAD
-
-    @Test
-        //FALLA
-=======
-  /*  @Test
->>>>>>> 390f455d9dfcf7b0105ff6ccb3f60e952eca8686
-    void whenGetPostCreated_Success(){
-
-        lenient().when(userRepository.getUserByName(u.getUsername())).thenReturn(u);
-        lenient().when(postRepository.findByCreatedBy(Mockito.any(),Mockito.any())).thenReturn(res);
-        assertEquals(pagedResponse,postService.getPostsByCreatedBy("Vicente",1,1));
-    }
-
-    @Test
-        //FALLA
-    void whenGetPostByCategory(){
-        lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
-        lenient().when(postRepository.findByCategory(Mockito.any(),Mockito.any())).thenReturn(res);
-        assertEquals(pagedResponse,postService.getPostsByCategory(category.getId(),1,1));
-    }
-
-    @Test
-        //FALLA
-    void whenGetPostByTag(){
-        lenient().when(tagRepository.findById(tag.getId())).thenReturn(java.util.Optional.ofNullable(tag));
-        //lenient().when(postRepository.findByTagsIn()).thenReturn(res);
-
-    }
-
-    @Test
-    void whenUpdatePost_ResourceNotFoundExceptionForPost(){
-        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
-        assertThrows(ResourceNotFoundException.class,()->postService.updatePost(p.getId(),postRequest,up));
-    }
-
-<<<<<<< HEAD
-    @Test
-    void whenUpdatePost_ResourceNotFoundExceptionForCategory(){
-        lenient().when(categoryRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(category));
-        assertThrows(ResourceNotFoundException.class,()->postService.updatePost(p.getId(),postRequest,up));
-    }
-
-    @Test
-    void whenUpdatePost(){
-        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
-        lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
-        lenient().when(postRepository.save(p)).thenReturn(p);
-        assertThrows(UnauthorizedException.class,()->postService.updatePost(p.getId(),postRequest,up));
-    }
-
-    @Test
-    void whenDeletePost_ResourceNotFoundExceptionForPost(){
-        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
-        assertThrows(ResourceNotFoundException.class,()->postService.deletePost(22L,up));
-    }
-
-    @Test
-    void whenDeletePost(){
-        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
-        assertThrows(UnauthorizedException.class,()->postService.deletePost(p.getId(),up));
-    }
-
-    @Test
-        //FALLA
-    void whenAddPost(){
-        lenient().when(userRepository.findById(u.getId())).thenReturn(java.util.Optional.ofNullable(u));
-        lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
-        lenient().when(tagRepository.findByName(tag.getName())).thenReturn(tag);
-        //lenient().when(tagRepository.save(tag));
-        //lenient().when(postRepository.save(p));
-        System.out.println(postService.addPost(postRequest,up));
-        System.out.println(postResponse);
-        //assertEquals(postService.addPost(postRequest,up),postResponse);
-    }
-
-    @Test
-    void whenAddPost_ResourceNotFoundExceptionForUser(){
-        lenient().when(userRepository.findById(u.getId())).thenReturn(java.util.Optional.ofNullable(u));
-        assertThrows(ResourceNotFoundException.class,()->postService.addPost(postRequest,up));
-    }
-
-    @Test
-    void whenAddPost_ResourceNotFoundExceptionForCategory(){
-        lenient().when(categoryRepository.findById(postRequest.getCategoryId())).thenReturn(java.util.Optional.ofNullable(category));
-        assertThrows(ResourceNotFoundException.class,()->postService.addPost(postRequest,up));
-    }
-
-    @Test
-    void whenGetPost(){
-
-        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
-        assertEquals(postService.getPost(p.getId()), p);
-    }
-
-    @Test
-    void whengetPost_ResourceNotFoundException(){
-
-        lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
-        assertThrows(ResourceNotFoundException.class,()->postService.deletePost(22L,up));
-    }
-=======
-        lenient().when(userRepository.getUserByName("Vicente")).thenReturn(u);
-        lenient().when(postRepository.findByCreatedBy(1L,pageable)).thenReturn(res);
-        System.out.println(postRepository.findByCreatedBy(1L,pageable).getNumberOfElements());
-        assertEquals(pagedResponse,postService.getPostsByCreatedBy("Vicente",1,1));
-    }*/
->>>>>>> 390f455d9dfcf7b0105ff6ccb3f60e952eca8686
-
-}
+    
