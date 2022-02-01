@@ -83,7 +83,7 @@ public class TodoControllerTest {
         mockMvc.perform(post("/api/todos")
                 .contentType("application/json")
                     .content(objectMapper.writeValueAsString(todo)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test

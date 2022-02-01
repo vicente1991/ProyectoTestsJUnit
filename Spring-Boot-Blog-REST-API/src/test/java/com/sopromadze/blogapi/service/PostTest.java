@@ -1,6 +1,5 @@
 package com.sopromadze.blogapi.service;
 
-import com.sopromadze.blogapi.exception.BlogapiException;
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.exception.UnauthorizedException;
 import com.sopromadze.blogapi.model.Category;
@@ -73,7 +72,6 @@ public class PostTest {
         private Category category;
         private List<Post> content;
         private Pageable pageable;
-        private Page<Tag> lisTag;
         private ApiResponse apiResponse;
 
         @BeforeEach
@@ -87,16 +85,10 @@ public class PostTest {
             category.setCreatedAt(Instant.now());
             category.setUpdatedAt(Instant.now());
 
-            postRequest= new PostRequest();
-            postRequest.setCategoryId(category.getId());
-            postRequest.setBody("bla");
-            postRequest.setTitle("PostR");
-
             Role rol = new Role();
             rol.setName(RoleName.ROLE_USER);
 
             List<Role> roles = Arrays.asList(rol);
-            
 
             u=new User();
             u.setUsername("Vicente");
@@ -109,15 +101,6 @@ public class PostTest {
                             .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                     .build();
 
-            p = new Post();
-            p.setTitle("Nuevo Post");
-            p.setId(1L);
-            p.setCreatedBy(1L);
-            p.setCategory(category);
-            p.setUser(u);
-            p.setCreatedAt(Instant.now());
-            p.setUpdatedAt(Instant.now());
-
 
             tag= new Tag();
             tag.setId(1L);
@@ -126,44 +109,56 @@ public class PostTest {
             tag.setCreatedAt(Instant.now());
             tag.setUpdatedAt(Instant.now());
 
+            res= new PageImpl<>(Arrays.asList(p));
+            content = res.getNumberOfElements() == 0 ? Collections.emptyList() : res.getContent();
             pagedResponse = new PagedResponse<>();
 
             pagedResponse.setContent(content);
             pagedResponse.setTotalPages(1);
             pagedResponse.setTotalElements(1);
-            pagedResponse.setPage(1);
+            pagedResponse.setPage(0);
             pagedResponse.setLast(true);
             pagedResponse.setSize(1);
 
+            postRequest= new PostRequest();
+            postRequest.setBody("bla");
+            postRequest.setCategoryId(1L);
+            postRequest.setTitle("PostR");
+
+            p = new Post();
+            p.setTitle(postRequest.getTitle());
+            p.setId(1L);
+            p.setTags(Collections.emptyList());
+            p.setBody(postRequest.getBody());
+            p.setCreatedBy(1L);
+            p.setCategory(category);
+            p.setUser(u);
+            p.setCreatedAt(Instant.now());
+            p.setUpdatedAt(Instant.now());
+
             postResponse= new PostResponse();
-            postResponse.setTitle("Creo");
-            postResponse.setTags(List.of(tag.getName()));
-            postResponse.setCategory("crear");
-            postResponse.setBody("Creando");
+            postResponse.setTitle(postRequest.getTitle());
+            postResponse.setTags(postRequest.getTags());
+            postResponse.setCategory(p.getCategory().getName());
+            postResponse.setBody(postRequest.getBody());
 
             apiResponse = new ApiResponse();
             apiResponse.setSuccess(false);
             apiResponse.setMessage("You don't have permission to delete this tag");
 
             pageable= PageRequest.of(1,1);
-
-            lisTag= new PageImpl<>(Arrays.asList(tag));
-            res= new PageImpl<>(Arrays.asList(p));
-
-            content = res.getNumberOfElements() == 0 ? Collections.emptyList() : res.getContent();
-
         }
 
 
         @Test
         void whengetAllPost_Success(){
+
             when(postRepository.findAll(any(Pageable.class))).thenReturn(res);
             assertEquals(pagedResponse, postService.getAllPosts(1, 1));
         }
 
 
         @Test
-            //FALLA
         void whenGetPostCreated_Success(){
 
             lenient().when(userRepository.getUserByName(u.getUsername())).thenReturn(u);
@@ -172,7 +167,6 @@ public class PostTest {
         }
 
         @Test
-            //FALLA
         void whenGetPostByCategory(){
             lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
             lenient().when(postRepository.findByCategory(Mockito.any(),Mockito.any())).thenReturn(res);
@@ -180,10 +174,10 @@ public class PostTest {
         }
 
         @Test
-            //FALLA
         void whenGetPostByTag(){
             lenient().when(tagRepository.findById(tag.getId())).thenReturn(java.util.Optional.ofNullable(tag));
-            //lenient().when(postRepository.findByTagsIn()).thenReturn(res);
+            lenient().when(postRepository.findByTagsIn(any(),any(Pageable.class))).thenReturn(res);
+            assertEquals(pagedResponse,postService.getPostsByTag(tag.getId(),0,1));
 
         }
 
@@ -219,17 +213,15 @@ public class PostTest {
             assertThrows(UnauthorizedException.class,()->postService.deletePost(p.getId(),up));
         }
 
+
         @Test
-            //FALLA
         void whenAddPost(){
-            lenient().when(userRepository.findById(u.getId())).thenReturn(java.util.Optional.ofNullable(u));
-            lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
+            lenient().when(userRepository.findById(up.getId())).thenReturn(java.util.Optional.ofNullable(u));
+            lenient().when(categoryRepository.findById(postRequest.getCategoryId())).thenReturn(java.util.Optional.ofNullable(category));
             lenient().when(tagRepository.findByName(tag.getName())).thenReturn(tag);
-            //lenient().when(tagRepository.save(tag));
-            //lenient().when(postRepository.save(p));
-            System.out.println(postService.addPost(postRequest,up));
-            System.out.println(postResponse);
-            //assertEquals(postService.addPost(postRequest,up),postResponse);
+            lenient().when(tagRepository.save(tag)).thenReturn(tag);
+            lenient().when(postRepository.save(any())).thenReturn(p);
+            assertEquals(postResponse,postService.addPost(postRequest,up));
         }
 
         @Test
