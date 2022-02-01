@@ -75,7 +75,7 @@ public class CommentTest {
         pagedResponse.setSize(1);
 
         Pageable pageable = PageRequest.of(1, 10);
-        when(commentRepository.findCommentByPostId(any(Long.class), any(Pageable.class))).thenReturn(res);
+        when(commentRepository.findByPostId(any(Long.class), any(Pageable.class))).thenReturn(res);
 
         assertEquals(pagedResponse, commentService.getAllComments(1L, 1, 10));
     }
@@ -132,7 +132,7 @@ public class CommentTest {
         p.setUser(u);
 
         CommentRequest com = new CommentRequest();
-                com.setBody("nuevo mensaje de texto");
+        com.setBody("nuevo mensaje de texto");
 
         lenient().when(userRepository.getUser(up)).thenReturn(u);
 
@@ -151,8 +151,8 @@ public class CommentTest {
     @Test
     void deleteComment_Success(){
 
-       Role rol = new Role();
-       rol.setName(RoleName.ROLE_ADMIN);
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
         List<Role> roles= Arrays.asList(rol);
         User u= new User();
         u.setId(1L);
@@ -521,5 +521,6 @@ public class CommentTest {
         assertThrows(BlogapiException.class, ()->commentService.updateComment(p.getId(), c.getId(),cr,userPrincipal));
 
     }
+
 
 }
