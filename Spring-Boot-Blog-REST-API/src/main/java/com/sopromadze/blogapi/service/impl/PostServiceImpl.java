@@ -80,7 +80,7 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public PagedResponse<Post> getPostsByCategory(Long id, int page, int size) {
+	public PagedResponse<Post> getPostsByCategoryId(Long id, int page, int size) {
 		AppUtils.validatePageNumberAndSize(page, size);
 		Category category = categoryRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(CATEGORY, ID, id));
@@ -95,7 +95,7 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public PagedResponse<Post> getPostsByTag(Long id, int page, int size) {
+	public PagedResponse<Post> getPostsByTagId(Long id, int page, int size) {
 		AppUtils.validatePageNumberAndSize(page, size);
 
 		Tag tag = tagRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(TAG, ID, id));

@@ -13,9 +13,9 @@ public interface PostService {
 
 	PagedResponse<Post> getPostsByCreatedBy(String username, int page, int size);
 
-	PagedResponse<Post> getPostsByCategory(Long id, int page, int size);
+	PagedResponse<Post> getPostsByCategoryId(Long id, int page, int size);
 
-	PagedResponse<Post> getPostsByTag(Long id, int page, int size);
+	PagedResponse<Post> getPostsByTagId(Long id, int page, int size);
 
 	Post updatePost(Long id, PostRequest newPostRequest, UserPrincipal currentUser);
 

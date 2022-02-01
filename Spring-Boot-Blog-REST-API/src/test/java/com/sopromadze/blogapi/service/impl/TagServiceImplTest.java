@@ -96,7 +96,7 @@ class TagServiceImplTest {
         when(tagRepository.findById(3L)).thenThrow(ResourceNotFoundException.class);
 
         assertThrows(ResourceNotFoundException.class,
-                        () -> tagRepository.findById(3L),
+                        () -> tagService.getTag(3L),
                         "No existe una etiqueta con ese ID");
     }
 
