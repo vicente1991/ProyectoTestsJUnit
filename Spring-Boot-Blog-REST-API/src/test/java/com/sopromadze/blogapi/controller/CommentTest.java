@@ -201,7 +201,7 @@ public class CommentTest {
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
 
-
+        comment.setUser(user);
         when(commentService.deleteComment(1L,1L,userPrincipal)).thenReturn(apiResponse);
         mockMvc.perform(delete("/api/posts/{postId}/comments/{id}",1L,1L)
                         .contentType("application/json"))
