@@ -2,6 +2,7 @@ package com.sopromadze.blogapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sopromadze.blogapi.config.SpringSecurityTestWebConfig;
+import com.sopromadze.blogapi.exception.ResponseEntityErrorException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.Post;
@@ -25,6 +26,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -40,6 +43,8 @@ import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -57,6 +62,9 @@ public class AlbumTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AlbumController albumController;
 
     @MockBean
     private AlbumService albumService;
@@ -257,6 +265,13 @@ public class AlbumTest {
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
     }
+
+    @Test
+    void handleExceptions_success() throws Exception{
+        assertEquals(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse), albumController.handleExceptions(new ResponseEntityErrorException(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse))));
+    }
+
+
 
 
 
