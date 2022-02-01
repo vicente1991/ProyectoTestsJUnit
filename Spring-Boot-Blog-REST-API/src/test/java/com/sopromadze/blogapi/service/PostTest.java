@@ -96,6 +96,7 @@ public class PostTest {
             rol.setName(RoleName.ROLE_USER);
 
             List<Role> roles = Arrays.asList(rol);
+            
 
             u=new User();
             u.setUsername("Vicente");
@@ -156,7 +157,6 @@ public class PostTest {
 
         @Test
         void whengetAllPost_Success(){
-
             when(postRepository.findAll(any(Pageable.class))).thenReturn(res);
             assertEquals(pagedResponse, postService.getAllPosts(1, 1));
         }
