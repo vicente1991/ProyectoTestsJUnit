@@ -8,6 +8,7 @@ import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.payload.PhotoRequest;
 import com.sopromadze.blogapi.payload.PhotoResponse;
@@ -56,6 +57,7 @@ public class PhotoServiceTest {
     User user;
     Role rolAdmin;
     Role rolUser;
+    ApiResponse apiResponse;
 
     @BeforeEach
     void initTest() {
@@ -108,6 +110,10 @@ public class PhotoServiceTest {
         result.setLast(true);
         result.setSize(1);
         result.setContent(photoResponseList);
+
+        apiResponse = new ApiResponse();
+        apiResponse.setSuccess(true);
+        apiResponse.setMessage("Photo deleted successfully");
     }
 
 
@@ -248,6 +254,113 @@ public class PhotoServiceTest {
         assertEquals(photoResponse2, photoService.addPhoto(photoRequest,userPrincipal));
     }
 
+
+    @Test
+    void addPhoto_throwResourceNotFoundException(){
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        when(albumRepository.findById(404L)).thenReturn(Optional.of(album));
+        Photo newPhoto = new Photo();
+        newPhoto.setAlbum(album);
+        newPhoto.setTitle(photoRequest.getTitle());
+        newPhoto.setThumbnailUrl(photoRequest.getThumbnailUrl());
+        newPhoto.setUrl(photoRequest.getUrl());
+
+        when(photoRepository.save(newPhoto)).thenReturn(newPhoto);
+
+        assertThrows(ResourceNotFoundException.class,()->photoService.addPhoto(photoRequest,userPrincipal));
+    }
+
+
+    @Test
+    void addPhoto_throwUnauthorizedException(){
+        List<Role> roles = Arrays.asList(rolUser);
+        User usernew = new User();
+        usernew.setId(4L);
+        usernew.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(usernew.getId())
+                .authorities(usernew.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.of(album));
+        Photo newPhoto = new Photo();
+        newPhoto.setAlbum(album);
+        newPhoto.setTitle(photoRequest.getTitle());
+        newPhoto.setThumbnailUrl(photoRequest.getThumbnailUrl());
+        newPhoto.setUrl(photoRequest.getUrl());
+
+        when(photoRepository.save(newPhoto)).thenReturn(newPhoto);
+
+        assertThrows(UnauthorizedException.class,()->photoService.addPhoto(photoRequest,userPrincipal));
+    }
+
+
+
+
+    @Test
+    void deletePhoto_success(){
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        when(photoRepository.findById(photo.getId())).thenReturn(Optional.of(photo));
+        assertEquals(apiResponse, photoService.deletePhoto(photo.getId(),userPrincipal));
+
+    }
+
+
+    @Test
+    void deletePhoto_throwResourceNotFoundException(){
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        when(photoRepository.findById(404L)).thenReturn(Optional.of(photo));
+        assertThrows(ResourceNotFoundException.class,()->photoService.deletePhoto(photo.getId(),userPrincipal));
+    }
+
+    @Test
+    void deletePhoto_throwUnauthorizedException(){
+        List<Role> roles = Arrays.asList(rolUser);
+        User usernew = new User();
+        usernew.setId(4L);
+        usernew.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(usernew.getId())
+                .authorities(usernew.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        when(photoRepository.findById(photo.getId())).thenReturn(Optional.of(photo));
+        assertThrows(UnauthorizedException.class,()->photoService.deletePhoto(photo.getId(),userPrincipal));
+    }
+
+    @Test
+    void getAllPhotosByAlbum_success(){
+
+        when(photoRepository.findByAlbumId(album.getId(),pageable)).thenReturn(pageResultPhoto);
+
+        List<PhotoResponse> photoResponses = new ArrayList<>(pageResultPhoto.getContent().size());
+
+        for (Photo photo : pageResultPhoto.getContent()) {
+            photoResponses.add(new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
+                    photo.getThumbnailUrl(), photo.getAlbum().getId()));
+        }
+
+        assertEquals(result, photoService.getAllPhotosByAlbum(album.getId(),1,1));
+    }
 
 
 
