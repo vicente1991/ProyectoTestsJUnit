@@ -2,6 +2,7 @@ package com.sopromadze.blogapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sopromadze.blogapi.config.SpringSecurityTestWebConfig;
+import com.sopromadze.blogapi.exception.ResponseEntityErrorException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.Post;
@@ -25,6 +26,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -40,6 +43,8 @@ import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -50,13 +55,16 @@ import static org.mockito.ArgumentMatchers.eq;
 @AutoConfigureMockMvc
 @Log
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
-public class AlbumTest {
+public class AlbumControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AlbumController albumController;
 
     @MockBean
     private AlbumService albumService;
@@ -66,51 +74,40 @@ public class AlbumTest {
 
     PagedResponse<AlbumResponse> albumList;
     Album albumResult;
-    UserPrincipal userPrincipal;
     User user;
     List<Photo> photoList;
     AlbumResponse albumResponse;
     AlbumRequest albumRequest;
     ApiResponse apiResponse;
     PagedResponse<PhotoResponse> photoResponsePagedResponse;
+    Role rolAdmin;
+    Role rolUser;
     @BeforeEach
     void initTest() {
-        Album album = new Album();
-        album.setId(1L);
-        album.setTitle("Album Controller");
+        albumResult = new Album();
+        albumResult.setId(1L);
+        albumResult.setTitle("Album Controller");
 
 
+        user =  new User();
+        user.setUsername("user");
+        user.setId(1L);
 
+        rolAdmin = new Role();
+        rolAdmin.setName(RoleName.ROLE_ADMIN);
 
-        Role rol = new Role();
-        rol.setName(RoleName.ROLE_ADMIN);
-
-        List<Role> roles = Arrays.asList(rol);
-
-        User userPrueba = new User();
-        userPrueba.setId(3L);
-        userPrueba.setRoles(roles);
-
-        UserPrincipal Principal = UserPrincipal.builder()
-                .id(userPrueba.getId())
-                .authorities(userPrueba.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
-                .build();
+        rolUser = new Role();
+        rolUser.setName(RoleName.ROLE_USER);
         photoList=new ArrayList<>();
 
+        albumResponse = new AlbumResponse();
+        albumResponse.setId(20L);
+        albumResponse.setTitle("AlbumResponse");
+        albumResponse.setUser(user);
+        albumResponse.setPhoto(photoList);
 
 
-        AlbumResponse albumResponsePrueba = new AlbumResponse();
-        albumResponsePrueba.setId(20L);
-        albumResponsePrueba.setTitle("AlbumResponse");
-        albumResponsePrueba.setUser(userPrueba);
-        albumResponsePrueba.setPhoto(photoList);
-        albumResponse=albumResponsePrueba;
 
-        userPrincipal=Principal;
-        user=userPrueba;
-
-        albumResult = album;
         albumList = new PagedResponse(List.of(albumResult), 1, 1, 1, 1, true);
         albumRequest = AlbumRequest.builder().id(10L).user(user).title("Almbun nuevo y bonito").photo(photoList).build();
 
@@ -122,11 +119,6 @@ public class AlbumTest {
         Page<Photo> photos= Page.empty();
 
         List<PhotoResponse> photoResponses = new ArrayList<>(photos.getContent().size());
-        for (Photo photo : photos.getContent()) {
-            photoResponses.add(new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
-                    photo.getThumbnailUrl(), photo.getAlbum().getId()));
-        }
-
 
         photoResponsePagedResponse = new PagedResponse<>(photoResponses, photos.getNumber(), photos.getSize(), photos.getTotalElements(),
                 photos.getTotalPages(), photos.isLast());
@@ -134,7 +126,7 @@ public class AlbumTest {
     }
 
 
-    @WithUserDetails("admin")
+
     @Test
     void getAllAlbums_success() throws Exception {
         when(albumService.getAllAlbums(1, 1)).thenReturn(albumList);
@@ -149,31 +141,40 @@ public class AlbumTest {
 
 
 
-    @WithMockUser(authorities = {"ROLE_USER"})
+    @WithUserDetails("user")
     @Test
     void addAlbum_success() throws Exception {
+        List<Role> roles = Arrays.asList(rolUser);
+        user.setId(3L);
+        user.setRoles(roles);
 
-
-
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
 
         when(albumService.addAlbum(albumRequest, userPrincipal)).thenReturn(albumResult);
-
-
         mockMvc.perform(post("/api/albums")
                         .content(objectMapper.writeValueAsString(albumRequest))
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
-
     }
 
     @Test
     void addAlbum_thenReturn401() throws Exception {
-
-        when(albumService.addAlbum(albumRequest, userPrincipal)).thenReturn(albumResult);
         mockMvc.perform(post("/api/albums")
                         .content(objectMapper.writeValueAsString(albumRequest))
                         .contentType("application/json"))
                 .andExpect(status().isUnauthorized()).andDo(print());
+    }
+    @WithUserDetails("admin")
+    @Test
+    void addAlbum_thenReturn403() throws Exception {
+        mockMvc.perform(post("/api/albums")
+                        .content(objectMapper.writeValueAsString(albumRequest))
+                        .contentType("application/json"))
+                .andExpect(status().isForbidden()).andDo(print());
     }
 
 
@@ -186,9 +187,19 @@ public class AlbumTest {
                 .andExpect(status().isOk()).andDo(print());
     }
 
-    @WithMockUser(authorities = {"ROLE_USER","ROLE_ADMIN"})
+    @WithUserDetails("admin")
     @Test
     void updateAlbum_success() throws Exception {
+
+        List<Role> roles = Arrays.asList(rolUser, rolAdmin);
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
 
         when(albumService.updateAlbum(1L,albumRequest,userPrincipal)).thenReturn(albumResponse);
 
@@ -200,9 +211,6 @@ public class AlbumTest {
 
     @Test
     void updateAlbum_thenReturn401() throws Exception {
-
-        when(albumService.updateAlbum(1L,albumRequest,userPrincipal)).thenReturn(albumResponse);
-
         mockMvc.perform(put("/api/albums/{id}",1L)
                         .content(objectMapper.writeValueAsString(albumRequest))
                         .contentType("application/json"))
@@ -211,9 +219,20 @@ public class AlbumTest {
 
 
 
-    @WithMockUser(authorities = {"ROLE_USER","ROLE_ADMIN"})
+    @WithUserDetails("admin")
     @Test
     void deleteAlbum_success() throws Exception {
+
+        List<Role> roles = Arrays.asList(rolUser, rolAdmin);
+        user.setId(3L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
         when(albumService.deleteAlbum(1L,userPrincipal)).thenReturn(apiResponse);
         mockMvc.perform(delete("/api/albums/{id}",1L)
                         .param("page", "1")
@@ -225,7 +244,6 @@ public class AlbumTest {
 
     @Test
     void deleteAlbum_thenReturn401() throws Exception {
-        when(albumService.deleteAlbum(1L,userPrincipal)).thenReturn(apiResponse);
         mockMvc.perform(delete("/api/albums/{id}",1L)
                         .param("page", "1")
                         .param("size", "1")
@@ -242,6 +260,13 @@ public class AlbumTest {
                         .contentType("application/json"))
                 .andExpect(status().isOk()).andDo(print());
     }
+
+    @Test
+    void handleExceptions_success() throws Exception{
+        assertEquals(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse), albumController.handleExceptions(new ResponseEntityErrorException(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse))));
+    }
+
+
 
 
 

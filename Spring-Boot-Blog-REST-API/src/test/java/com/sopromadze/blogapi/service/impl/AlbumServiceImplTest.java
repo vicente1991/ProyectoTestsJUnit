@@ -2,44 +2,50 @@ package com.sopromadze.blogapi.service.impl;
 
 import com.sopromadze.blogapi.exception.BlogapiException;
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
+import com.sopromadze.blogapi.exception.UnauthorizedException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.AlbumResponse;
 import com.sopromadze.blogapi.payload.ApiResponse;
+import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.payload.request.AlbumRequest;
 import com.sopromadze.blogapi.repository.AlbumRepository;
 import com.sopromadze.blogapi.repository.UserRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
+import com.sopromadze.blogapi.service.impl.AlbumServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import static com.sopromadze.blogapi.utils.AppConstants.ID;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+
+@ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AlbumServiceImplTest {
 
     @Mock
-    AlbumRepository albumRepository;
+    private AlbumRepository albumRepository;
 
     @InjectMocks
     AlbumServiceImpl albumService;
@@ -62,9 +68,19 @@ class AlbumServiceImplTest {
     static BlogapiException blogapiException;
     static List<Role> roles, roles2;
     static List<Album> listaAlbumes;
+    static Page<Album> albumPage;
+    static Pageable pageable;
+    static PagedResponse emptyPagedResponse;
 
     @BeforeEach
     void initData () {
+
+        albumPage = Page.empty();
+
+        emptyPagedResponse = new PagedResponse(Collections.emptyList(), albumPage.getNumber(), albumPage.getSize(), albumPage.getTotalElements(),
+                albumPage.getTotalPages(), albumPage.isLast());
+
+        pageable = PageRequest.of(1, 1, Sort.Direction.DESC, CREATED_AT);
 
         user = new User ("Inmaculada", "Domínguez", "inmadv", "inma.dvgs@gmail.com", "12345");
         user2 = new User ("Javier", "Domínguez", "javidv", "javierdominguez2006@gmail.com", "54321");
@@ -91,9 +107,9 @@ class AlbumServiceImplTest {
 
 
         album2 =  new Album();
-        album.setId(5L);
-        album.setTitle("Love Yourself : Answer");
-        album.setUser(user2);
+        album2.setId(5L);
+        album2.setTitle("Love Yourself : Answer");
+        album2.setUser(user2);
 
         albumRequest = AlbumRequest.builder().user(user).build();
         albumRequest2 = AlbumRequest.builder().user(user2).build();
@@ -109,29 +125,60 @@ class AlbumServiceImplTest {
 
     @Test
     void isAlbumListEmpty() {
-        List<Album> lista = albumRepository.findAll();
 
-        assertEquals(lista.size(), 0);
+        when(albumRepository.findAll(pageable)).thenReturn(albumPage);
+
+        assertEquals(albumService.getAllAlbums(1,1), emptyPagedResponse);
+
+
+    }
+
+    @Test
+    void getAllAlbums_Success(){
+
+        Page<Album> albums2 = new PageImpl<>(Arrays.asList(album));
+
+        when(albumRepository.findAll(pageable)).thenReturn(albums2);
+
+        AlbumResponse albumResponse = new AlbumResponse();
+        albumResponse.setId(9L);
+        albumResponse.setTitle("Título original");
+
+        List<AlbumResponse> albumResponses = Arrays.asList(albumResponse);
+
+        AlbumResponse [] arrayResponse = {albumResponse};
+
+        when(modelMapper.map(albums2.getContent(), AlbumResponse[].class)).thenReturn(arrayResponse);
+
+        PagedResponse pagedResponse = new PagedResponse(albumResponses, albums2.getNumber(), albums2.getSize(), albums2.getTotalElements(), albums2.getTotalPages(),
+                albums2.isLast());
+
+        assertThat(albumService.getAllAlbums(1, 1).equals(pagedResponse));
     }
 
 
     @Test
-    void addsAlbum() {
+    void addAlbum_Success() {
+       when(userRepository.getUser(UserPrincipal.create(user))).thenReturn(user);
 
-        when(albumRepository.save(any(Album.class))).thenReturn(album);
+       modelMapper.map(albumRequest, album);
 
-        assertThat(albumRepository.findById(album.getId()).isPresent());
+       Album newAlbum = album;
+
+       when(albumRepository.save(any(Album.class))).thenReturn(newAlbum);
+
+       assertThat(albumService.addAlbum(albumRequest, UserPrincipal.create(user)).equals(newAlbum));
     }
 
 
     @Test
-    void getAlbum() {
-        when(albumRepository.findById(any(Long.class))).thenReturn(Optional.of(album));
+    void getAlbum_Success() {
+        when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
         assertNotNull(albumService.getAlbum(1L));
     }
 
     @Test
-    void doesNotGetAlbum(){
+    void getAlbum_throwsResourceNotFound(){
         when(albumRepository.findById(44L)).thenThrow(new ResourceNotFoundException(ALBUM_STR, ID, 44L));
         assertThat(new ResourceNotFoundException(ALBUM_STR, ID, 44L));
     }
@@ -148,40 +195,74 @@ class AlbumServiceImplTest {
 
     @Test
     void updatesAlbum(){
-        Album nuevoAlbum = new Album();
-        nuevoAlbum.setTitle("Love Yourself 轉 'Tear'");
+
+        when(albumRepository.findById(any(Long.class))).thenReturn(Optional.of(album));
+
+        AlbumRequest nuevoAlbum = AlbumRequest.builder().title("Love Yourself 轉 'Tear'").build();
         album.setTitle(nuevoAlbum.getTitle());
 
-        userPrincipal.create(user);
+        Album albumActualizado = album;
+
+        when(albumRepository.save(any(Album.class))).thenReturn(albumActualizado);
+
+        when(userRepository.getUser(userPrincipal.create(user))).thenReturn(user);
 
         AlbumResponse albumResponse = new AlbumResponse();
 
-        when(albumRepository.save(any(Album.class))).thenReturn(album);
+       // when(modelMapper.map(any(), any())).thenReturn(albumResponse);
 
-        modelMapper.map(album, albumResponse);
-
-        when(albumService.updateAlbum(album.getId(), albumRequest, userPrincipal.create(user))).thenReturn(albumResponse);
-
-        assertThat(albumResponse);
+        assertThat(albumService.updateAlbum(albumActualizado.getId(), albumRequest, userPrincipal.create(user)));
 
 
     }
 
+
     @Test
-    void notAdmin_updateAlbum(){
-        assertThat(albumService.updateAlbum(album2.getId(), albumRequest2, userPrincipal.create(user2)).equals(blogapiException));
+    void updateAlbum_notAdmin(){
+
+        when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
+
+        AlbumRequest nuevoAlbum = AlbumRequest.builder().title("Love Yourself 轉 'Tear'").build();
+        album.setTitle(nuevoAlbum.getTitle());
+
+        Album albumActualizado = album;
+
+        when(albumRepository.save(any(Album.class))).thenReturn(albumActualizado);
+
+        when(userRepository.getUser(userPrincipal.create(user2))).thenReturn(user2);
+
+        AlbumResponse albumResponse = new AlbumResponse();
+
+        when(modelMapper.map(any(), any())).thenReturn(albumResponse);
+
+        assertThrows(BlogapiException.class,
+                        () -> albumService
+                                .updateAlbum(albumActualizado.getId(), albumRequest, UserPrincipal.create(user2)));
+
     }
 
     @Test
     void deletesAlbum() {
-        ApiResponse result = new ApiResponse(Boolean.TRUE, "You successfully deleted album");
-        assertEquals(result, albumService.deleteAlbum(1L, userPrincipal.create(user)));
+        when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
+
+        when(userRepository.getUser(UserPrincipal.create(user))).thenReturn(user);
+
+        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "You successfully deleted album");
+
+        assertEquals(albumService.deleteAlbum(1L, UserPrincipal.create(user)), apiResponse);
 
     }
 
     @Test
-    void unauthorizedUser_deleteAlbum(){
-        assertEquals(albumService.deleteAlbum(1L, userPrincipal.create(user3)), blogapiException);
+    void deleteAlbum_throwUnauthorizedUser(){
+        when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
+
+        when(userRepository.getUser(UserPrincipal.create(user2))).thenReturn(user2);
+
+        assertThrows(BlogapiException.class,
+                () -> albumService.deleteAlbum(1L, UserPrincipal.create(user2)), "No tiene permiso para borrar este álbum");
+
+
     }
 
     @Test

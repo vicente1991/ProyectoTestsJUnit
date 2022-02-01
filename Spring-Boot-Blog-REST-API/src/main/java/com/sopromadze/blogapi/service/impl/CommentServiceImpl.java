@@ -51,7 +51,7 @@ public class CommentServiceImpl implements CommentService {
 		AppUtils.validatePageNumberAndSize(page, size);
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
 
-		Page<Comment> comments = commentRepository.findByPostId(postId, pageable);
+		Page<Comment> comments = commentRepository.findCommentByPostId(postId, pageable);
 
 		return new PagedResponse<>(comments.getContent(), comments.getNumber(), comments.getSize(),
 				comments.getTotalElements(), comments.getTotalPages(), comments.isLast());

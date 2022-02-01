@@ -21,12 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class PhotoTest {
+public class PhotoRepositoryTest {
     @Autowired
     private PhotoRepository repository;
 
-    @Autowired
-    private AlbumRepository albumRepository ;
 
     @Autowired
     private TestEntityManager testEntityManager;
@@ -40,12 +38,12 @@ public class PhotoTest {
     void test_findByAlbumId() {
 
         Album album = new Album();
-        album.setTitle("Fotos");
+        album.setTitle("Titulo");
+
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
 
         testEntityManager.persist(album);
-
 
         Photo photo = new Photo();
         photo.setTitle("Photo1");
@@ -56,6 +54,7 @@ public class PhotoTest {
         photo.setUpdatedAt(Instant.now());
 
         testEntityManager.persist(photo);
+
 
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
 
