@@ -28,10 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ExtendWith(SpringExtension.class)
@@ -120,12 +117,6 @@ public class PhotoServiceTest {
     @Test
     void getAllPhotos_success(){
         when(photoRepository.findAll(pageable)).thenReturn(pageResultPhoto);
-        List<PhotoResponse> photoResponses = new ArrayList<>(pageResultPhoto.getContent().size());
-        for (Photo photo : pageResultPhoto.getContent()) {
-            photoResponses.add(new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
-                    photo.getThumbnailUrl(), photo.getAlbum().getId()));
-        }
-
         assertEquals(result, photoService.getAllPhotos(1,1));
     }
 

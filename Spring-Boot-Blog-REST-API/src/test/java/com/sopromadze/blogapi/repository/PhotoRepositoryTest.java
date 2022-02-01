@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class PhotoTest {
+public class PhotoRepositoryTest {
     @Autowired
     private PhotoRepository repository;
 

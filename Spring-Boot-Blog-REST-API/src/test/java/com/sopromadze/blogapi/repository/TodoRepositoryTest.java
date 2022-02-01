@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class TodoTest {
+public class TodoRepositoryTest {
 
     @Autowired
     private TodoRepository repository;
