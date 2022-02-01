@@ -161,9 +161,13 @@ public class PostTest {
         assertEquals(pagedResponse, postService.getAllPosts(1, 1));
     }
 
+<<<<<<< HEAD
 
     @Test
         //FALLA
+=======
+  /*  @Test
+>>>>>>> 390f455d9dfcf7b0105ff6ccb3f60e952eca8686
     void whenGetPostCreated_Success(){
 
         lenient().when(userRepository.getUserByName(u.getUsername())).thenReturn(u);
@@ -193,6 +197,7 @@ public class PostTest {
         assertThrows(ResourceNotFoundException.class,()->postService.updatePost(p.getId(),postRequest,up));
     }
 
+<<<<<<< HEAD
     @Test
     void whenUpdatePost_ResourceNotFoundExceptionForCategory(){
         lenient().when(categoryRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(category));
@@ -257,5 +262,12 @@ public class PostTest {
         lenient().when(postRepository.findById(p.getId())).thenReturn(java.util.Optional.ofNullable(p));
         assertThrows(ResourceNotFoundException.class,()->postService.deletePost(22L,up));
     }
+=======
+        lenient().when(userRepository.getUserByName("Vicente")).thenReturn(u);
+        lenient().when(postRepository.findByCreatedBy(1L,pageable)).thenReturn(res);
+        System.out.println(postRepository.findByCreatedBy(1L,pageable).getNumberOfElements());
+        assertEquals(pagedResponse,postService.getPostsByCreatedBy("Vicente",1,1));
+    }*/
+>>>>>>> 390f455d9dfcf7b0105ff6ccb3f60e952eca8686
 
 }
