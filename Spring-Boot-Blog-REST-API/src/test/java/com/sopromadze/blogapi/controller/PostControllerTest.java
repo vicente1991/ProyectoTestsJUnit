@@ -98,7 +98,7 @@ class PostControllerTest {
 
     }
 
-
+//Comprobar las badRequest, los notfound y los unauthorized
     @Test
     void getAllPosts_Success() throws Exception{
 
