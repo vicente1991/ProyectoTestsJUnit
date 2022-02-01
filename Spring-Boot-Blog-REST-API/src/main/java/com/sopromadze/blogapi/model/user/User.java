@@ -65,7 +65,10 @@ public class User extends DateAudit {
 	private String username;
 
 	@NotBlank
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
+	//He tenido que dejar comentada la linea de abajo para que me dejara hacer peticiones post y put de User
+
+	//@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Size(max = 100)
 	@Column(name = "password")
 	private String password;

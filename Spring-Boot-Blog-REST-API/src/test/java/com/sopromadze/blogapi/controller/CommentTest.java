@@ -58,6 +58,7 @@ public class CommentTest {
     Role rolUser;
     CommentRequest commentRequest;
     ApiResponse apiResponse;
+
     @BeforeEach
     void initTest() {
         post = new Post();

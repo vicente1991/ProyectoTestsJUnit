@@ -1,4 +1,4 @@
-package com.sopromadze.blogapi.service.impl;
+package com.sopromadze.blogapi.service;
 
 
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
@@ -13,6 +13,7 @@ import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.repository.CategoryRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
+import com.sopromadze.blogapi.service.impl.CategoryServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
