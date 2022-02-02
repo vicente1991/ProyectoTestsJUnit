@@ -1,4 +1,4 @@
-package com.sopromadze.blogapi.service;
+package com.sopromadze.blogapi.service.impl;
 
 
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ExtendWith(SpringExtension.class)
-public class CategoryServiceTest {
+public class CategoryServiceImplTest {
 
     @Mock
     CategoryRepository categoryRepository;

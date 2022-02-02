@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class AlbumTest {
+public class AlbumRepositoryTest {
 
     @Autowired
     private AlbumRepository albumRepository;
@@ -28,20 +28,6 @@ public class AlbumTest {
     @Autowired
     private TestEntityManager testEntityManager;
 
-
-    @Test
-    void test_findAll() {
-
-        Album album = new Album();
-        album.setTitle("Título");
-        album.setCreatedAt(Instant.now());
-        album.setUpdatedAt(Instant.now());
-
-        testEntityManager.persist(album);
-
-        assertNotEquals(1, albumRepository.findAll().size());
-
-    }
 
     @Test
     void findCreated_Succes(){
