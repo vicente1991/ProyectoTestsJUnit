@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CommentTest {
+public class CommentServiceTest {
 
     @Mock
     CommentRepository commentRepository;
@@ -75,7 +75,7 @@ public class CommentTest {
         pagedResponse.setSize(1);
 
         Pageable pageable = PageRequest.of(1, 10);
-        when(commentRepository.findByPostId(any(Long.class), any(Pageable.class))).thenReturn(res);
+        when(commentRepository.findCommentByPostId(any(Long.class), any(Pageable.class))).thenReturn(res);
 
         assertEquals(pagedResponse, commentService.getAllComments(1L, 1, 10));
     }
