@@ -183,15 +183,6 @@ class AlbumServiceImplTest {
         assertThat(new ResourceNotFoundException(ALBUM_STR, ID, 44L));
     }
 
-    @Test
-    void getAlbumUser() {
-        assertEquals(album.getUser().getId(), user.getId());
-    }
-
-    @Test
-    void userIsAdmin(){
-        assertThat(user.getRoles().contains(RoleName.ROLE_ADMIN));
-    }
 
     @Test
     void updatesAlbum(){

@@ -173,7 +173,7 @@ class PostControllerTest {
 
 
     @Test
-    void addPost_throwsUnauthorized () throws Exception {
+    void addPost_thenReturns401 () throws Exception {
 
         when(postService.addPost(postRequest, userPrincipal2)).thenThrow(UnauthorizedException.class);
 
@@ -215,7 +215,7 @@ class PostControllerTest {
     }
 
     @Test
-    void updatePost_throwsUnauthorized () throws Exception {
+    void updatePost_thenReturns401 () throws Exception {
 
         when(postService.updatePost(1L, postRequest, userPrincipal2)).thenThrow(UnauthorizedException.class);
 
@@ -240,7 +240,7 @@ class PostControllerTest {
     }
 
     @Test
-    void deletePost_throwsUnauthorized() throws Exception{
+    void deletePost_thenReturns401() throws Exception{
 
         when(postService.deletePost(1L, userPrincipal2)).thenThrow(UnauthorizedException.class);
 
