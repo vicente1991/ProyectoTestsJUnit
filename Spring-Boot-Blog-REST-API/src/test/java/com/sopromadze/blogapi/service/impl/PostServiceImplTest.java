@@ -169,15 +169,15 @@ public class PostTest {
         @Test
         void whenGetPostByCategory(){
             lenient().when(categoryRepository.findById(category.getId())).thenReturn(java.util.Optional.ofNullable(category));
-            lenient().when(postRepository.findByCategory(Mockito.any(),Mockito.any())).thenReturn(res);
-            assertEquals(pagedResponse,postService.getPostsByCategory(category.getId(),1,1));
+            lenient().when(postRepository.findByCategoryId(Mockito.any(),Mockito.any())).thenReturn(res);
+            assertEquals(pagedResponse,postService.getPostsByCategoryId(category.getId(),1,1));
         }
 
         @Test
         void whenGetPostByTag(){
             lenient().when(tagRepository.findById(tag.getId())).thenReturn(java.util.Optional.ofNullable(tag));
             lenient().when(postRepository.findByTagsIn(any(),any(Pageable.class))).thenReturn(res);
-            assertEquals(pagedResponse,postService.getPostsByTag(tag.getId(),0,1));
+            assertEquals(pagedResponse,postService.getPostsByTagId(tag.getId(),0,1));
 
         }
 
