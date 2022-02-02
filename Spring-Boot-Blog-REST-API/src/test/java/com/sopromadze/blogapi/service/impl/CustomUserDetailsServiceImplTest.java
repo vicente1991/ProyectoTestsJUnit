@@ -1,4 +1,4 @@
-package com.sopromadze.blogapi.service;
+package com.sopromadze.blogapi.service.impl;
 
 
 import com.sopromadze.blogapi.model.role.Role;
@@ -24,7 +24,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
-public class CustomUserDetailsServiceTest {
+public class CustomUserDetailsServiceImplTest {
 
     @Mock
     UserRepository userRepository;

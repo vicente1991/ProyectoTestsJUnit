@@ -1,4 +1,4 @@
-package com.sopromadze.blogapi.service;
+package com.sopromadze.blogapi.service.impl;
 
 
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ExtendWith(SpringExtension.class)
-public class PhotoServiceTest {
+public class PhotoServiceImplTest {
 
     @Mock
     PhotoRepository photoRepository;
