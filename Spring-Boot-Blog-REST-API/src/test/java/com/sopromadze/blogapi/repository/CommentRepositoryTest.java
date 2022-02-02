@@ -64,7 +64,7 @@ class CommentRepositoryTest {
 
 
     @Test
-    void findByPostId() {
+    void findByPostId_Success() {
 
         Page<Comment> comment = commentRepository.findCommentByPostId(post.getId(), any(Pageable.class));
 

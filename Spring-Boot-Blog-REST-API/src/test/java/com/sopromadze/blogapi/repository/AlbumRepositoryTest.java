@@ -30,7 +30,7 @@ public class AlbumRepositoryTest {
 
 
     @Test
-    void findCreated_Succes(){
+    void findCreated_Success(){
         Album a= new Album();
         a.setTitle("album mejor que el anterior");
         a.setCreatedAt(Instant.now());
